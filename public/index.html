@@ -15,11 +15,12 @@
   <div id="session" class="hidden">
     <p>Comparte este enlace con los jugadores:</p>
     <input type="text" id="join-link" readonly>
-    <canvas id="qr"></canvas>
+    <!-- ✅ cambia a esto -->
+<div id="qr"></div>
     <button id="next">Siguiente canción</button>
     <div id="bingo-msg"></div>
   </div>
-<script src="/js/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="/js/admin.js"></script>
 </body>
 </html>
