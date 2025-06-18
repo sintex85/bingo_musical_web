@@ -99,7 +99,7 @@ if (shareId) {                      // --------- JUGADOR ----------
 
 // Devuelve una copia truncada (máx 120 canciones) si el QR se pasa de capacidad
 function fitForQR(arr){
-  const MAX_BYTES = 1800;     // margen de seguridad para que quepa en QR v40
+  const MAX_BYTES = 1200;     // límite más estricto para que siempre quepa
   let n = arr.length;
   let slim = arr;
   do {
@@ -109,6 +109,16 @@ function fitForQR(arr){
     n -= 10; // quita 10 pistas y prueba de nuevo
   } while (n > 25);
   return slim; // última tentativa
+}
+
+// Genera el QR y devuelve true/false según haya cabido
+function safeQRCode(el, url){
+  try{
+    new QRCode(el, { text:url, width:160, height:160 });
+    return true;
+  }catch(_){
+    return false;
+  }
 }
 
 /* ---------- FUNCIONES PRINCIPALES ---------- */
@@ -151,16 +161,15 @@ function makeQR(sessionId, tracks){
   const usable = fitForQR(tracks);
   const slim   = usable.map(t => [t.name, t.artist]);
   const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(slim));
-  const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${compressed}`;
-  // QRCode falla con URLs >~3000, pero esto suele quedar <1500
+  const shareUrl   = `${location.origin}${location.pathname}?s=${sessionId}&t=${compressed}`;
+
   if (usable.length < tracks.length){
-    statusEl.textContent = `QR recortado a ${usable.length} canciones (de ${tracks.length}).`;
+    statusEl.textContent = `QR recortado a ${usable.length}/${tracks.length} canciones.`;
   }
-  try {
-    new QRCode(qrEl, { text: shareUrl, width:160, height:160 });
-  } catch(e){
-    console.error('No pude generar QR', e);
-    qrEl.textContent = 'ERROR QR: playlist demasiado grande';
+
+  if(!safeQRCode(qrEl, shareUrl)){
+    qrEl.innerHTML = `<a href="${shareUrl}">Abrir enlace de la partida</a>`;
+    statusEl.textContent += ' — Lista aún demasiado grande para QR; usa el enlace.';
   }
 }
 
