@@ -96,6 +96,21 @@ if (shareId) {                      // --------- JUGADOR ----------
   };
 }
 
+
+// Devuelve una copia truncada (máx 120 canciones) si el QR se pasa de capacidad
+function fitForQR(arr){
+  const MAX_BYTES = 2500;     // versión 40 QRCap ~2953
+  let n = arr.length;
+  let slim = arr;
+  do {
+    slim = shuffle(arr).slice(0, n);
+    const test = LZString.compressToEncodedURIComponent(JSON.stringify(slim.map(t=>[t.name,t.artist])));
+    if (test.length <= MAX_BYTES) return slim;
+    n -= 10; // quita 10 pistas y prueba de nuevo
+  } while (n > 30);
+  return slim; // última tentativa
+}
+
 /* ---------- FUNCIONES PRINCIPALES ---------- */
 
 async function joinSession(id){
@@ -133,12 +148,20 @@ function checkWin(){
 
 function makeQR(sessionId, tracks){
   qrEl.innerHTML='';
-  // Reducimos cada pista a [nombre, artista] para ahorrar espacio
-  const slim = tracks.map(t => [t.name, t.artist]);
+  const usable = fitForQR(tracks);
+  const slim   = usable.map(t => [t.name, t.artist]);
   const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(slim));
   const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${compressed}`;
   // QRCode falla con URLs >~3000, pero esto suele quedar <1500
-  new QRCode(qrEl, { text: shareUrl, width:160, height:160 });
+  if (usable.length < tracks.length){
+    statusEl.textContent = `QR redondeado a ${usable.length} canciones para que quepa (de ${tracks.length}).`;
+  }
+  try {
+    new QRCode(qrEl, { text: shareUrl, width:160, height:160 });
+  } catch(e){
+    console.error('No pude generar QR', e);
+    qrEl.textContent = 'ERROR QR: playlist demasiado grande';
+  }
 }
 
 /* ---------- SPOTIFY ---------- */
