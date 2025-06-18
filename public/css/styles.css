@@ -1,5 +1,0 @@
-body { font-family: Arial, sans-serif; margin: 20px; }
-.hidden { display: none; }
-.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 600px; margin-bottom: 20px; }
-.cell { border: 1px solid #333; padding: 10px; text-align: center; cursor: pointer; }
-.cell.marked { background-color: #4caf50; color: white; }
