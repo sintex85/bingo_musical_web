@@ -1,4 +1,0 @@
-body { font-family: Arial, sans-serif; text-align: center; }
-.board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; max-width: 500px; margin: auto; }
-.cell { border: 1px solid #ccc; padding: 10px; cursor: pointer; }
-.cell.mark { background-color: #90ee90; }
