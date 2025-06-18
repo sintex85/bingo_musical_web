@@ -32,6 +32,7 @@ body{font-family:system-ui, sans-serif;max-width:800px;margin:auto;padding:1rem}
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <script>
 /* ---------- CONFIGÚRALO COMO MÁS TE PLAZCA ---------- */
 const CLIENT_ID     = '7e17927393ac4860a8dc204cb7144c19';
@@ -42,8 +43,10 @@ const shareId = params.get('s');          // null si no existe
 const encodedTracks = params.get('t');
 if (shareId && encodedTracks && !localStorage.getItem('bingo_'+shareId)) {
   try {
-    const json = decodeURIComponent(escape(atob(encodedTracks)));
-    localStorage.setItem('bingo_'+shareId, json);
+    const json = LZString.decompressFromEncodedURIComponent(encodedTracks);
+    const slim = JSON.parse(json);                      // [[name, artist], ...]
+    const full = slim.map(([name, artist]) => ({ name, artist }));
+    localStorage.setItem('bingo_'+shareId, JSON.stringify(full));
   } catch(e){ console.error('No pude decodificar las pistas', e); }
 }
 // --- acceso Spotify para el ADMIN (flujo implicit) ---
@@ -81,6 +84,7 @@ if (shareId) {                      // --------- JUGADOR ----------
 
     try {
       const tracks = await getPlaylistTracks(id);
+      if (!tracks.length) throw new Error('Playlist vacía o no accesible');
       const sessionId = Math.random().toString(36).substring(2,8);
       localStorage.setItem('bingo_'+sessionId, JSON.stringify(tracks));
       makeQR(sessionId, tracks);
@@ -129,9 +133,12 @@ function checkWin(){
 
 function makeQR(sessionId, tracks){
   qrEl.innerHTML='';
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(tracks))));
-  const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${encoded}`;
-  new QRCode(qrEl, {text: shareUrl, width:160,height:160});
+  // Reducimos cada pista a [nombre, artista] para ahorrar espacio
+  const slim = tracks.map(t => [t.name, t.artist]);
+  const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(slim));
+  const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${compressed}`;
+  // QRCode falla con URLs >~3000, pero esto suele quedar <1500
+  new QRCode(qrEl, { text: shareUrl, width:160, height:160 });
 }
 
 /* ---------- SPOTIFY ---------- */
