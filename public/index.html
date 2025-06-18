@@ -10,7 +10,7 @@ body{font-family:system-ui, sans-serif;max-width:800px;margin:auto;padding:1rem}
 .cell{padding:.5rem;border:1px solid #999;background:#f1f1f1;font-size:.8rem;cursor:pointer}
 .cell.mark{background:#4caf50;color:#fff}
 #qr img{max-width:160px}
-#qr canvas { width: 100%; height: auto; }
+#qr canvas{max-width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -115,8 +115,13 @@ function fitForQR(arr){
 // Genera el QR con tamaño dinámico según la longitud; devuelve true/false
 function safeQRCode(el, url){
   const len  = url.length;
-  // ajusta tamaño: <=800B → 200px, 801‑1000 → 260px, >1000 → 320px
-  const size = len > 1000 ? 320 : (len > 800 ? 260 : 200);
+  // Mapeo:   ≤600B → 240 px, 601‑900 → 320 px, 901‑1100 → 400 px,  >1100 → 480 px
+  let size;
+  if      (len > 1100) size = 480;
+  else if (len > 900)  size = 400;
+  else if (len > 600)  size = 320;
+  else                 size = 240;
+
   try{
     new QRCode(el, { text:url, width:size, height:size });
     return true;
