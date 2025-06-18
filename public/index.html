@@ -9,7 +9,9 @@ body{font-family:system-ui, sans-serif;max-width:800px;margin:auto;padding:1rem}
 .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.25rem;margin-top:1rem}
 .cell{padding:.5rem;border:1px solid #999;background:#f1f1f1;font-size:.8rem;cursor:pointer}
 .cell.mark{background:#4caf50;color:#fff}
+</style>
 #qr img{max-width:160px}
+#qr canvas { width: 100%; height: auto; }
 </style>
 </head>
 <body>
@@ -111,10 +113,13 @@ function fitForQR(arr){
   return slim; // última tentativa
 }
 
-// Genera el QR y devuelve true/false según haya cabido
+// Genera el QR con tamaño dinámico según la longitud; devuelve true/false
 function safeQRCode(el, url){
+  const len  = url.length;
+  // ajusta tamaño: <=800B → 200px, 801‑1000 → 260px, >1000 → 320px
+  const size = len > 1000 ? 320 : (len > 800 ? 260 : 200);
   try{
-    new QRCode(el, { text:url, width:160, height:160 });
+    new QRCode(el, { text:url, width:size, height:size });
     return true;
   }catch(_){
     return false;
