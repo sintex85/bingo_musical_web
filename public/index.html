@@ -35,6 +35,9 @@ body{font-family:system-ui, sans-serif;max-width:800px;margin:auto;padding:1rem}
 <script>
 /* ---------- CONFIGÚRALO COMO MÁS TE PLAZCA ---------- */
 const CLIENT_ID     = '7e17927393ac4860a8dc204cb7144c19';
+// --- identificación de la sesión (si viene ?s=abcd en la URL) ---
+const params  = new URLSearchParams(location.search);
+const shareId = params.get('s');          // null si no existe
 // const CLIENT_SECRET = '05c4fc646c414094a76d00e05274a026'; // ya no se usa
 /* ---------- AUTORIZACIÓN OAUTH IMPLÍCITA ---------- */
 const hashParams = new URLSearchParams(location.hash.substring(1));
@@ -64,9 +67,6 @@ const boardEl   = document.getElementById('board');
 const titleEl   = document.getElementById('title');
 const lineaEl   = document.getElementById('linea');
 const qrEl      = document.getElementById('qr');
-
-const params = new URLSearchParams(location.search);
-const shareId = params.get('s');     // ID compartido para la sesión
 
 if (shareId) {                      // --------- JUGADOR ----------
   adminSec.hidden = true;
