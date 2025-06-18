@@ -46,7 +46,17 @@ if (shareId && encodedTracks && !localStorage.getItem('bingo_'+shareId)) {
     localStorage.setItem('bingo_'+shareId, json);
   } catch(e){ console.error('No pude decodificar las pistas', e); }
 }
-const CLIENT_SECRET = '05c4fc646c414094a76d00e05274a026';
+// --- acceso Spotify para el ADMIN (flujo implicit) ---
+let ACCESS_TOKEN = null;
+const hash = new URLSearchParams(location.hash.substring(1));
+if (hash.has('access_token')) {
+  ACCESS_TOKEN = hash.get('access_token');
+  sessionStorage.setItem('spot_access', ACCESS_TOKEN);
+  // limpia el fragmento #access_token=...
+  history.replaceState(null, '', location.pathname + location.search);
+} else {
+  ACCESS_TOKEN = sessionStorage.getItem('spot_access');
+}
 /* ---------------------------------------------------- */
 
 const adminSec  = document.getElementById('admin');
@@ -144,26 +154,14 @@ async function getPlaylistTracks(playlistId){
 }
 
 async function fetchToken(){
-  const cached = JSON.parse(sessionStorage.getItem('spot_tok') || '{}');
-  if (cached.expires > Date.now()) return cached.access;
-
-  const body = new URLSearchParams();
-  body.append('grant_type','client_credentials');
-
-  const res  = await fetch('https://accounts.spotify.com/api/token',{
-    method:'POST',
-    headers:{
-      'Authorization':'Basic '+btoa(CLIENT_ID+':'+CLIENT_SECRET),
-      'Content-Type':'application/x-www-form-urlencoded'
-    },
-    body
-  });
-  const data = await res.json();
-  sessionStorage.setItem('spot_tok', JSON.stringify({
-    access : data.access_token,
-    expires: Date.now() + (data.expires_in - 30) * 1000
-  }));
-  return data.access_token;
+  if (ACCESS_TOKEN) return ACCESS_TOKEN;
+  // Si no hay token (primera vez como admin), pide login a Spotify
+  const redirectUri = location.origin + location.pathname;
+  location.href =
+    `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
+    `&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&scope=playlist-read-private`;
+  throw new Error('Redirigiendo a login de Spotify');
 }
 
 /* ---------- UTIL ---------- */
