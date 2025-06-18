@@ -5,7 +5,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const crypto = require('crypto');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3333;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
