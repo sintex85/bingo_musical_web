@@ -38,6 +38,14 @@ const CLIENT_ID     = '7e17927393ac4860a8dc204cb7144c19';
 // --- identificación de la sesión (si viene ?s=abcd en la URL) ---
 const params  = new URLSearchParams(location.search);
 const shareId = params.get('s');          // null si no existe
+// Si viene ?t= (tracks base64) y aún no tenemos la sesión en localStorage, la restauramos
+const encodedTracks = params.get('t');
+if (shareId && encodedTracks && !localStorage.getItem('bingo_'+shareId)) {
+  try {
+    const json = decodeURIComponent(escape(atob(encodedTracks)));
+    localStorage.setItem('bingo_'+shareId, json);
+  } catch(e){ console.error('No pude decodificar las pistas', e); }
+}
 const CLIENT_SECRET = '05c4fc646c414094a76d00e05274a026';
 /* ---------------------------------------------------- */
 
@@ -65,7 +73,7 @@ if (shareId) {                      // --------- JUGADOR ----------
       const tracks = await getPlaylistTracks(id);
       const sessionId = Math.random().toString(36).substring(2,8);
       localStorage.setItem('bingo_'+sessionId, JSON.stringify(tracks));
-      makeQR(sessionId);
+      makeQR(sessionId, tracks);
       statusEl.textContent = `Sesión ${sessionId} lista (${tracks.length} canciones). Escanea el QR.`;
     } catch(e) {
       statusEl.textContent = 'Error al obtener la playlist';
@@ -109,9 +117,10 @@ function checkWin(){
   if(total>=20) alert('🎉 ¡BINGO! Ve a reclamar tu premio');
 }
 
-function makeQR(sessionId){
+function makeQR(sessionId, tracks){
   qrEl.innerHTML='';
-  const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}`;
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(tracks))));
+  const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${encoded}`;
   new QRCode(qrEl, {text: shareUrl, width:160,height:160});
 }
 
