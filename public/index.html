@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Bingo Musical</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:system-ui, sans-serif;max-width:800px;margin:auto;padding:1rem}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.25rem;margin-top:1rem}
+.cell{padding:.5rem;border:1px solid #999;background:#f1f1f1;font-size:.8rem;cursor:pointer}
+.cell.mark{background:#4caf50;color:#fff}
+#qr img{max-width:160px}
+</style>
+</head>
+<body>
+
+<h2>Bingo Musical</h2>
+
+<!-- ADMIN PANEL -->
+<section id="admin">
+  <input id="playlistUrl" placeholder="URL de playlist pública">
+  <button id="load">Cargar</button>
+  <span id="status"></span>
+  <div id="qr"></div>
+</section>
+
+<!-- PLAYER BOARD -->
+<section id="player" hidden>
+  <h3 id="title"></h3>
+  <div id="board" class="grid"></div>
+  <p id="linea"></p>
+</section>
+
+<script src="qr.min.js"></script>
+<script>
+/* ---------- CONFIGÚRALO COMO MÁS TE PLAZCA ---------- */
+const CLIENT_ID     = '7e17927393ac4860a8dc204cb7144c19';
+const CLIENT_SECRET = '05c4fc646c414094a76d00e05274a026';
+/* ---------------------------------------------------- */
+
+const adminSec  = document.getElementById('admin');
+const playerSec = document.getElementById('player');
+const urlField  = document.getElementById('playlistUrl');
+const statusEl  = document.getElementById('status');
+const boardEl   = document.getElementById('board');
+const titleEl   = document.getElementById('title');
+const lineaEl   = document.getElementById('linea');
+const qrEl      = document.getElementById('qr');
+
+const params = new URLSearchParams(location.search);
+const shareId = params.get('s');     // ID compartido para la sesión
+
+if (shareId) {                      // --------- JUGADOR ----------
+  adminSec.hidden = true;
+  joinSession(shareId);
+} else {                            // --------- ADMIN ------------
+  document.getElementById('load').onclick = async () => {
+    const playlistUrl = urlField.value.trim();
+    const m = playlistUrl.match(/playlist\/([a-zA-Z0-9]+)/);
+    if (!m) return alert('URL de playlist inválida');
+    const id = m[1];
+    statusEl.textContent = 'Cargando…';
+
+    try {
+      const tracks = await getPlaylistTracks(id);
+      const sessionId = Math.random().toString(36).substring(2,8);
+      localStorage.setItem('bingo_'+sessionId, JSON.stringify(tracks));
+      makeQR(sessionId);
+      statusEl.textContent = `Sesión ${sessionId} lista (${tracks.length} canciones). Escanea el QR.`;
+    } catch(e) {
+      statusEl.textContent = 'Error al obtener la playlist';
+      console.error(e);
+    }
+  };
+}
+
+/* ---------- FUNCIONES PRINCIPALES ---------- */
+
+async function joinSession(id){
+  const raw = localStorage.getItem('bingo_'+id);
+  if (!raw) {
+    titleEl.textContent = 'Esta sesión no existe. Pide al anfitrión el QR correcto.';
+    playerSec.hidden = false; return;
+  }
+  const tracks = JSON.parse(raw);
+  const board  = shuffle(tracks).slice(0,25);
+  titleEl.textContent = 'Marca las canciones que oigas 👂';
+  board.forEach((t,i)=>{
+    const b = document.createElement('div');
+    b.className='cell';
+    b.textContent=`${t.name} – ${t.artist}`;
+    b.onclick=()=>{b.classList.toggle('mark'); checkWin();};
+    boardEl.appendChild(b);
+  });
+  playerSec.hidden=false;
+}
+
+function checkWin(){
+  const cells=[...boardEl.children];
+  const marks=cells.map(c=>c.classList.contains('mark'));
+  // línea horizontal
+  let linea=false;
+  for(let r=0;r<5;r++){
+    if(marks.slice(r*5,r*5+5).every(Boolean)){linea=true;break;}
+  }
+  lineaEl.textContent = linea?'¡Línea!':'';
+  // bingo = 20 marcas
+  const total=marks.filter(Boolean).length;
+  if(total>=20) alert('🎉 ¡BINGO! Ve a reclamar tu premio');
+}
+
+function makeQR(sessionId){
+  qrEl.innerHTML='';
+  const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}`;
+  new QRCode(qrEl, {text: shareUrl, width:160,height:160});
+}
+
+/* ---------- SPOTIFY ---------- */
+
+async function getPlaylistTracks(playlistId){
+  const token = await fetchToken();
+  let url=`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+  const tracks=[];
+  while(url){
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`}});
+    const d=await r.json();
+    tracks.push(...d.items.map(it=>({
+      name:it.track.name,
+      artist:it.track.artists.map(a=>a.name).join(', '),
+      preview:it.track.preview_url
+    })));
+    url=d.next;
+  }
+  return tracks;
+}
+
+async function fetchToken(){
+  const cached=JSON.parse(sessionStorage.getItem('spot_tok')||'{}');
+  if(cached.expires> Date.now()) return cached.access;
+  const body=new URLSearchParams();
+  body.append('grant_type','client_credentials');
+  const res=await fetch('https://accounts.spotify.com/api/token',{
+    method:'POST',
+    headers:{'Authorization':'Basic '+btoa(CLIENT_ID+':'+CLIENT_SECRET),
+             'Content-Type':'application/x-www-form-urlencoded'},
+    body
+  });
+  const data=await res.json();
+  sessionStorage.setItem('spot_tok',JSON.stringify({
+    access:data.access_token,
+    expires:Date.now()+ (data.expires_in-30)*1000
+  }));
+  return data.access_token;
+}
+
+/* ---------- UTIL ---------- */
+function shuffle(a){return a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);}
+
+</script>
+</body>
+</html>

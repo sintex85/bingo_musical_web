@@ -1,0 +1,14 @@
+<button id="play">▶️</button>
+<button id="pause">⏸️</button>
+<button id="next">⏭️</button>
+<a id="qrLink" href="" target="_blank">Abrir QR</a>
+
+<script type="module">
+import io from '/socket.io/socket.io.js';
+const socket = io();
+socket.emit('join', { sessionId: sessionIdFromURL(), role: 'admin' });
+
+document.getElementById('play').onclick  = () => socket.emit('admin:play');
+document.getElementById('pause').onclick = () => socket.emit('admin:pause');
+document.getElementById('next').onclick  = () => socket.emit('admin:next');
+</script>
