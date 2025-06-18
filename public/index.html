@@ -107,18 +107,25 @@ function fitForQR(arr){
 
 // Genera el QR con tamaño dinámico según la longitud; devuelve true/false
 function safeQRCode(el, url){
-  const len  = url.length;
-  // Mapeo:   ≤600B → 240 px, 601‑900 → 320 px, 901‑1100 → 400 px,  >1100 → 480 px
-  let size;
-  if      (len > 1100) size = 480;
-  else if (len > 900)  size = 400;
-  else if (len > 600)  size = 320;
-  else                 size = 240;
+  const len = url.length;
 
+  /*  sube el lienzo según longitud  */
+  let size;
+  if      (len > 1100) size = 720;   // enorme
+  else if (len > 900)  size = 560;
+  else if (len > 600)  size = 400;
+  else                 size = 280;
+
+  /* usa corrección de errores “L” (20 %) para reducir densidad */
   try{
-    new QRCode(el, { text:url, width:size, height:size });
+    new QRCode(el, {
+      text: url,
+      width: size,
+      height: size,
+      correctLevel: QRCode.CorrectLevel.L   // <-- clave
+    });
     return true;
-  }catch(_){
+  }catch{
     return false;
   }
 }

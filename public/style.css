@@ -110,9 +110,11 @@ button:active{
 }
 
 #qr canvas{
-  image-rendering:pixelated;
-  width:auto;
+  width:auto;          /* tamaño fijo para que no se escale */
   height:auto;
+  image-rendering:pixelated;
+  max-width:100%;      /* solo cuando la pantalla es más pequeña */
+  border-radius:12px;
 }
 
 /* ===== CARTÓN DEL JUGADOR ============================================== */
