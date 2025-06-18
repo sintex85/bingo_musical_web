@@ -32,7 +32,7 @@ createBtn.addEventListener('click', async () => {
     ws.close();
   }
 
-  ws = new WebSocket(`ws://${location.host}`);
+  ws = new WebSocket(`ws://${location.host}/ws`);
   ws.onopen = () => ws.send(JSON.stringify({ type: 'join', sessionId, role: 'admin' }));
 
   ws.onmessage = (ev) => {

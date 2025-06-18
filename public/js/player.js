@@ -36,7 +36,7 @@ function checkLines() {
   statusDiv.textContent = '';
 }
 
-ws = new WebSocket(`ws://${location.host}`);
+ws = new WebSocket(`ws://${location.host}/ws`);
 ws.onopen = () => ws.send(JSON.stringify({ type: 'join', sessionId, role: 'player' }));
 ws.onmessage = (ev) => {
   const msg = JSON.parse(ev.data);

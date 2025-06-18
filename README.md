@@ -1,21 +1,24 @@
-# Bingo Musical Web
+# Bingo Musical Web (Python)
 
-Esta es una implementación mínima de una aplicación de Bingo Musical utilizando Node.js, Express y la API de Spotify. Permite crear una sesión de bingo a partir de una playlist pública de Spotify y que los jugadores se unan desde su navegador.
+Esta es una versión sencilla de un bingo musical implementada en Python usando [aiohttp](https://aiohttp.readthedocs.io/). No requiere Node.js y mantiene una funcionalidad similar a la versión anterior.
+
+## Requisitos
+
+- Python 3.8 o superior
+- Las variables de entorno `SPOTIFY_CLIENT_ID` y `SPOTIFY_CLIENT_SECRET` con las credenciales de una aplicación de Spotify
 
 ## Instalación
 
+```bash
+pip install -r requirements.txt
 ```
-npm install
-```
-
-Debes definir las variables de entorno `SPOTIFY_CLIENT_ID` y `SPOTIFY_CLIENT_SECRET` con las credenciales de tu aplicación de Spotify.
 
 ## Uso
 
-```
-node server.js
+```bash
+python app.py
 ```
 
-Accede a `http://localhost:3000` para el panel de administración. Al crear la partida se generará un enlace para que los jugadores se unan.
+El servidor quedará disponible en `http://localhost:3333`. Desde esa URL se accede al panel de administración. Al crear la partida se genera un enlace para que los jugadores se unan.
 
-Esta aplicación es solo un ejemplo y no gestiona audio ni autenticación avanzada.
+Esta aplicación guarda toda la información en memoria, por lo que las partidas se pierden al reiniciar. Se incluye un ejemplo sencillo y no gestiona audio ni autenticación avanzada.
