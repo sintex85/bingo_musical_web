@@ -1,33 +1,19 @@
-const urlParams = new URLSearchParams(window.location.search);
-const sessionId = urlParams.get('sessionId');
-const socket = io();
+/* admin.js  – versión estática sin back‑end ni WebSocket
+--------------------------------------------------------- */
+const playlistInput = document.getElementById('playlist');
+const createBtn     = document.getElementById('create');
+const linkBox       = document.getElementById('link');
 
-let playlist = [];
+createBtn.addEventListener('click', () => {
+  const playlist = playlistInput.value.trim();
 
-fetch(`/playlist.json?sessionId=${sessionId}`)
-  .then(r => r.json())
-  .then(data => {
-    playlist = data;
-    renderTracks();
-  });
+  if (!playlist.includes('spotify.com/playlist/')) {
+    alert('URL de playlist no válida');
+    return;
+  }
 
-function renderTracks() {
-  const container = document.getElementById('tracks');
-  playlist.forEach((t, idx) => {
-    const btn = document.createElement('button');
-    btn.textContent = t.name;
-    btn.addEventListener('click', () => {
-      socket.emit('playTrack', { sessionId, trackIndex: idx });
-      if (t.preview_url) {
-        const audio = document.getElementById('audio');
-        audio.src = t.preview_url;
-        audio.play();
-      }
-    });
-    container.appendChild(btn);
-  });
-}
+  // Genera URL para jugadores (solo con parámetro ?playlist=)
+  const joinURL = `${location.origin}/player.html?playlist=${encodeURIComponent(playlist)}`;
 
-socket.on('play', ({ track, index }) => {
-  // maybe update UI
+  linkBox.innerHTML = `<a href="${joinURL}" target="_blank">${joinURL}</a>`;
 });
