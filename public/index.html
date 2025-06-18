@@ -116,27 +116,23 @@
         return slim; // última tentativa
       }
 
-      // Genera el QR con tamaño dinámico según la longitud; devuelve true/false
-      function safeQRCode(el, url) {
-        const len = url.length;
-
-        /*  sube el lienzo según longitud  */
+      // Genera el QR con tamaño dinámico según la longitud y el ancho de pantalla; devuelve true/false
+      function safeQRCode(el, url){
+        const len  = url.length;
         let size;
-        if (len > 1100) size = 720; // enorme
-        else if (len > 900) size = 560;
-        else if (len > 600) size = 400;
-        else size = 280;
+        if      (len > 1100) size = 720;
+        else if (len > 900)  size = 560;
+        else if (len > 600)  size = 400;
+        else                 size = 280;
 
-        /* usa corrección de errores “L” (20 %) para reducir densidad */
-        try {
-          new QRCode(el, {
-            text: url,
-            width: size,
-            height: size,
-            correctLevel: QRCode.CorrectLevel.L, // <-- clave
-          });
+        // No dejar que sobrepase el 90 % del ancho de la ventana
+        const vw = Math.min(window.innerWidth, window.screen?.availWidth || window.innerWidth);
+        size = Math.min(size, Math.floor(vw * 0.9));
+
+        try{
+          new QRCode(el, { text:url, width:size, height:size, correctLevel:QRCode.CorrectLevel.L });
           return true;
-        } catch {
+        }catch{
           return false;
         }
       }
@@ -201,6 +197,18 @@
           qrEl.innerHTML = `<a href="${shareUrl}">Abrir enlace de la partida</a>`;
           statusEl.textContent +=
             " — Lista aún demasiado grande para QR; usa el enlace.";
+        }
+
+        // Crear / actualizar botón de compartir por WhatsApp
+        let waBtn = document.getElementById('waBtn');
+        if (!waBtn){
+          waBtn = document.createElement('button');
+          waBtn.id = 'waBtn';
+          waBtn.textContent = 'Enviar enlace por WhatsApp';
+          waBtn.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`,'_blank');
+          qrEl.parentNode.insertBefore(waBtn, qrEl.nextSibling);
+        } else {
+          waBtn.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`,'_blank');
         }
       }
 
