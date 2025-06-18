@@ -132,3 +132,32 @@ button:active{
   background:#4caf50;
   color:#fff;
 }
+/* --- Cartón bingo de 5×5 --- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:4px;
+  width:100%;
+  max-width:520px;
+  margin:1.5rem auto;
+}
+
+.cell{
+  background:#fff;
+  color:#222;
+  font-size:.9rem;
+  text-align:center;
+  padding:1rem .4rem;
+  border-radius:6px;
+  box-shadow:0 1px 3px rgba(0,0,0,.15);
+  user-select:none;
+  cursor:pointer;
+  transition:transform .1s, background .15s;
+}
+
+.cell:hover{transform:translateY(-2px);}
+.cell.mark{
+  background:#4caf50;
+  color:#fff;
+  transform:scale(0.96);
+}
