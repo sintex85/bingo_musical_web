@@ -47,7 +47,7 @@ const sessions = {};
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Fallback for any other route to serve index.html (for client-side routing)
-app.get('*', (req, res) => {
+app.get('/:path(*)', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
