@@ -58,7 +58,7 @@ async function getSpotifyAccessToken() {
     }
 
     try {
-        const response = await axios.post('[https://accounts.spotify.com/api/token](https://accounts.spotify.com/api/token)',
+        const response = await axios.post('https://accounts.spotify.com/api/token',
             new URLSearchParams({
                 grant_type: 'client_credentials'
             }).toString(), {
