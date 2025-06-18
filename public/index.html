@@ -1,260 +1,617 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Musical</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <h2>Bingo Musical</h2>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #a8dadc 0%, #457b9d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #f1faee;
+        }
+        .container {
+            background-color: rgba(29, 53, 87, 0.95); /* Dark blue with transparency */
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 90vw;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-sizing: border-box;
+            border: 2px solid #a8dadc;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f1faee;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .form-input {
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #457b9d;
+            border-radius: 0.75rem;
+            background-color: #f1faee;
+            color: #1d3557;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #a8dadc;
+        }
+        .btn {
+            background: linear-gradient(145deg, #e63946 0%, #c1121f 100%); /* Red gradient */
+            color: #f1faee;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+            border: none;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(230, 57, 70, 0.6);
+        }
+        .btn-green {
+            background: linear-gradient(145deg, #84a98c 0%, #52796f 100%); /* Green gradient */
+            box-shadow: 0 5px 15px rgba(132, 169, 140, 0.4);
+        }
+        .btn-green:hover {
+            box-shadow: 0 7px 20px rgba(132, 169, 140, 0.6);
+        }
+        .btn-blue {
+            background: linear-gradient(145deg, #a8dadc 0%, #457b9d 100%); /* Blue gradient */
+            box-shadow: 0 5px 15px rgba(168, 218, 220, 0.4);
+        }
+        .btn-blue:hover {
+            box-shadow: 0 7px 20px rgba(168, 218, 220, 0.6);
+        }
 
-    <!-- ADMIN PANEL -->
-    <section id="admin">
-      <input id="playlistUrl" placeholder="URL de playlist pública" />
-      <button id="load">Cargar</button>
-      <span id="status"></span>
-      <div id="qr"></div>
-    </section>
+        .bingo-card {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            background-color: #f1faee;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            border: 3px solid #1d3557;
+        }
+        .bingo-cell {
+            background-color: #a8dadc;
+            border: 2px solid #457b9d;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            min-height: 80px; /* Ensure a minimum height for cells */
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1d3557;
+            position: relative;
+            overflow: hidden;
+            word-break: break-word; /* Allow long words to break */
+            line-height: 1.2;
+        }
+        .bingo-cell.marked {
+            background-color: #e63946;
+            color: #f1faee;
+            transform: scale(0.98);
+            border-color: #c1121f;
+        }
+        .bingo-cell.marked::after {
+            content: '\f00c'; /* Checkmark icon from Font Awesome */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            color: rgba(255, 255, 255, 0.5);
+            pointer-events: none; /* Make sure it doesn't block clicks */
+        }
+        .admin-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .qr-code-container {
+            background-color: #f1faee;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        .game-status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1faee;
+            margin-top: 1rem;
+        }
+        #message-box {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(230, 57, 70, 0.95);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
 
-    <!-- PLAYER BOARD -->
-    <section id="player" hidden>
-      <h3 id="title"></h3>
-      <div id="board" class="grid"></div>
-      <p id="linea"></p>
-    </section>
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .bingo-cell {
+                min-height: 60px;
+                font-size: 0.75rem;
+            }
+            .admin-controls {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+        @media (max-width: 480px) {
+            .bingo-cell {
+                min-height: 50px;
+                font-size: 0.65rem;
+            }
+            .bingo-cell.marked::after {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-center items-center min-h-screen p-4">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <div id="message-box" class="rounded-lg shadow-lg"></div>
+
+    <div id="role-selection" class="container w-full max-w-lg mx-auto">
+        <h1>¡Bingo Musical!</h1>
+        <p class="text-lg mb-6">¿Eres el administrador o un jugador?</p>
+        <div class="flex flex-col md:flex-row gap-4 justify-center">
+            <button id="admin-btn" class="btn btn-blue"><i class="fas fa-user-shield"></i> Soy Admin</button>
+            <button id="player-btn" class="btn btn-green"><i class="fas fa-users"></i> Soy Jugador</button>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
+        <h1>Panel de Administración</h1>
+        <div id="create-session-section">
+            <label for="playlist-url" class="block text-lg mb-2">Enlace de Playlist Pública de Spotify:</label>
+            <input type="text" id="playlist-url" class="form-input mb-4" placeholder="Ej: https://open.spotify.com/playlist/...">
+            <button id="create-session-btn" class="btn"><i class="fas fa-play"></i> Iniciar Nueva Sesión</button>
+        </div>
+
+        <div id="session-info" class="hidden mt-6">
+            <p class="text-lg font-bold mb-2">ID de Sesión: <span id="session-id-display"></span></p>
+            <p class="text-lg mb-4">Comparte este enlace para que los jugadores se unan:</p>
+            <a id="join-link" href="#" target="_blank" class="text-blue-200 hover:underline text-lg font-medium mb-4 block overflow-hidden text-ellipsis whitespace-nowrap"></a>
+            <div id="qrcode" class="qr-code-container mx-auto"></div>
+
+            <div class="game-status mt-6">
+                <p>Canción Actual: <span id="current-song-info">Ninguna</span></p>
+            </div>
+            <div class="admin-controls mt-4">
+                <button id="play-pause-btn" class="btn btn-green"><i class="fas fa-play"></i> Iniciar</button>
+                <button id="next-song-btn" class="btn btn-blue"><i class="fas fa-forward"></i> Siguiente Canción</button>
+                <button id="check-winners-btn" class="btn"><i class="fas fa-trophy"></i> Verificar Ganadores</button>
+            </div>
+            <audio id="audio-player" class="w-full mt-4 rounded-lg hidden"></audio>
+            <div id="winner-display" class="mt-4 text-xl font-bold text-yellow-300"></div>
+            <p class="mt-4 text-sm text-gray-300">Nota: El audio solo se reproduce en el navegador del administrador.</p>
+        </div>
+    </div>
+
+    <div id="player-view" class="container w-full max-w-3xl mx-auto hidden">
+        <h1>Tu Cartón de Bingo</h1>
+        <div id="join-session-section">
+            <label for="join-session-id" class="block text-lg mb-2">Introduce ID de Sesión:</label>
+            <input type="text" id="join-session-id" class="form-input mb-4" placeholder="ID de sesión">
+            <button id="join-session-btn" class="btn btn-green"><i class="fas fa-sign-in-alt"></i> Unirse a Sesión</button>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <div id="bingo-card" class="bingo-card mb-6">
+                <!-- Celdas del cartón de bingo se insertarán aquí -->
+            </div>
+            <div class="game-status mt-4">
+                <p>Canciones Marcadas: <span id="marked-count">0</span> / 20</p>
+                <p>Líneas Completadas: <span id="lines-count">0</span></p>
+            </div>
+            <div id="win-message" class="mt-4 text-2xl font-bold text-yellow-300 hidden">¡BINGO!</div>
+        </div>
+    </div>
+
+    <!-- Mueve los scripts de las librerías al final del body -->
+    <!-- Se usa un CDN para Socket.IO para mayor fiabilidad en la carga -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
-      /* ---------- CONFIGÚRALO COMO MÁS TE PLAZCA ---------- */
-      const CLIENT_ID = "7e17927393ac4860a8dc204cb7144c19";
-      // --- identificación de la sesión (si viene ?s=abcd en la URL) ---
-      const params = new URLSearchParams(location.search);
-      const shareId = params.get("s"); // null si no existe
-      // Si viene ?t= (tracks base64) y aún no tenemos la sesión en localStorage, la restauramos
-      const encodedTracks = params.get("t");
-      if (
-        shareId &&
-        encodedTracks &&
-        !localStorage.getItem("bingo_" + shareId)
-      ) {
-        try {
-          const json =
-            LZString.decompressFromEncodedURIComponent(encodedTracks);
-          const slim = JSON.parse(json); // [[name, artist], ...]
-          const full = slim.map(([name, artist]) => ({ name, artist }));
-          localStorage.setItem("bingo_" + shareId, JSON.stringify(full));
-        } catch (e) {
-          console.error("No pude decodificar las pistas", e);
-        }
-      }
-      // --- acceso Spotify para el ADMIN (flujo implicit) ---
-      let ACCESS_TOKEN = null;
-      const hash = new URLSearchParams(location.hash.substring(1));
-      if (hash.has("access_token")) {
-        ACCESS_TOKEN = hash.get("access_token");
-        sessionStorage.setItem("spot_access", ACCESS_TOKEN);
-        // limpia el fragmento #access_token=...
-        history.replaceState(null, "", location.pathname + location.search);
-      } else {
-        ACCESS_TOKEN = sessionStorage.getItem("spot_access");
-      }
-      /* ---------------------------------------------------- */
+        // Función para mostrar mensajes temporales al usuario
+        function showMessage(message, type = 'error') {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = message;
+            msgBox.className = 'rounded-lg shadow-lg show'; // Restablece clases y añade 'show'
+            if (type === 'success') {
+                msgBox.style.backgroundColor = 'rgba(76, 175, 80, 0.95)'; // Verde para éxito
+            } else if (type === 'info') {
+                msgBox.style.backgroundColor = 'rgba(33, 150, 243, 0.95)'; // Azul para información
+            } else {
+                msgBox.style.backgroundColor = 'rgba(230, 57, 70, 0.95)'; // Rojo para error
+            }
 
-      const adminSec = document.getElementById("admin");
-      const playerSec = document.getElementById("player");
-      const urlField = document.getElementById("playlistUrl");
-      const statusEl = document.getElementById("status");
-      const boardEl = document.getElementById("board");
-      const titleEl = document.getElementById("title");
-      const lineaEl = document.getElementById("linea");
-      const qrEl = document.getElementById("qr");
-
-      if (shareId) {
-        // --------- JUGADOR ----------
-        adminSec.remove();
-        adminSec.hidden = true;
-        joinSession(shareId);
-      } else {
-        // --------- ADMIN ------------
-        document.getElementById("load").onclick = async () => {
-          const playlistUrl = urlField.value.trim();
-          const m = playlistUrl.match(/playlist\/([a-zA-Z0-9]+)/);
-          if (!m) return alert("URL de playlist inválida");
-          const id = m[1];
-          statusEl.textContent = "Cargando…";
-
-          try {
-            const tracks = await getPlaylistTracks(id);
-            if (!tracks.length)
-              throw new Error("Playlist vacía o no accesible");
-            const sessionId = Math.random().toString(36).substring(2, 8);
-            localStorage.setItem("bingo_" + sessionId, JSON.stringify(tracks));
-            makeQR(sessionId, tracks);
-            statusEl.textContent = `Sesión ${sessionId} lista (${tracks.length} canciones). Escanea el QR.`;
-          } catch (e) {
-            statusEl.textContent = "Error al obtener la playlist";
-            console.error(e);
-          }
-        };
-      }
-
-      // Devuelve una copia truncada (máx 120 canciones) si el QR se pasa de capacidad
-      function fitForQR(arr) {
-        const MAX_BYTES = 1200; // límite más estricto para que siempre quepa
-        let n = arr.length;
-        let slim = arr;
-        do {
-          slim = shuffle(arr).slice(0, n);
-          const test = LZString.compressToEncodedURIComponent(
-            JSON.stringify(slim.map((t) => [t.name, t.artist]))
-          );
-          if (test.length <= MAX_BYTES) return slim;
-          n -= 10; // quita 10 pistas y prueba de nuevo
-        } while (n > 25);
-        return slim; // última tentativa
-      }
-
-      // Genera el QR con tamaño dinámico según la longitud y el ancho de pantalla; devuelve true/false
-      function safeQRCode(el, url){
-        const len  = url.length;
-        let size;
-        if      (len > 1100) size = 720;
-        else if (len > 900)  size = 560;
-        else if (len > 600)  size = 400;
-        else                 size = 280;
-
-        // No dejar que sobrepase el 90 % del ancho de la ventana
-        const vw = Math.min(window.innerWidth, window.screen?.availWidth || window.innerWidth);
-        size = Math.min(size, Math.floor(vw * 0.9));
-
-        try{
-          new QRCode(el, { text:url, width:size, height:size, correctLevel:QRCode.CorrectLevel.L });
-          return true;
-        }catch{
-          return false;
-        }
-      }
-
-      /* ---------- FUNCIONES PRINCIPALES ---------- */
-
-      async function joinSession(id) {
-        const raw = localStorage.getItem("bingo_" + id);
-        if (!raw) {
-          titleEl.textContent =
-            "Esta sesión no existe. Pide al anfitrión el QR correcto.";
-          playerSec.hidden = false;
-          return;
-        }
-        const tracks = JSON.parse(raw);
-        const board = shuffle(tracks).slice(0, 25);
-        titleEl.textContent = "Marca las canciones que oigas 👂";
-        board.forEach((t, i) => {
-          const b = document.createElement("div");
-          b.className = "cell";
-          b.textContent = `${t.name} – ${t.artist}`.slice(0,40);
-          b.onclick = () => {
-            b.classList.toggle("mark");
-            checkWin();
-          };
-          boardEl.appendChild(b);
-        });
-        playerSec.hidden = false;
-      }
-
-      function checkWin() {
-        const cells = [...boardEl.children];
-        const marks = cells.map((c) => c.classList.contains("mark"));
-        // línea horizontal
-        let linea = false;
-        for (let r = 0; r < 5; r++) {
-          if (marks.slice(r * 5, r * 5 + 5).every(Boolean)) {
-            linea = true;
-            break;
-          }
-        }
-        lineaEl.textContent = linea ? "¡Línea!" : "";
-        // bingo = 20 marcas
-        const total = marks.filter(Boolean).length;
-        if (total >= 20) alert("🎉 ¡BINGO! Ve a reclamar tu premio");
-      }
-
-      function makeQR(sessionId, tracks) {
-        qrEl.innerHTML = "";
-        const usable = fitForQR(tracks);
-        const slim = usable.map((t) => [t.name, t.artist]);
-        const compressed = LZString.compressToEncodedURIComponent(
-          JSON.stringify(slim)
-        );
-        const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${compressed}`;
-
-        if (usable.length < tracks.length) {
-          statusEl.textContent = `QR recortado a ${usable.length}/${tracks.length} canciones.`;
+            setTimeout(() => {
+                msgBox.classList.remove('show');
+            }, 3000);
         }
 
-        if (!safeQRCode(qrEl, shareUrl)) {
-          qrEl.innerHTML = `<a href="${shareUrl}">Abrir enlace de la partida</a>`;
-          statusEl.textContent +=
-            " — Lista aún demasiado grande para QR; usa el enlace.";
-        }
+        let socket; // Declara la variable socket globalmente para este script
 
-        // Crear / actualizar botón de compartir por WhatsApp
-        let waBtn = document.getElementById('waBtn');
-        if (!waBtn){
-          waBtn = document.createElement('button');
-          waBtn.id = 'waBtn';
-          waBtn.textContent = 'Enviar enlace por WhatsApp';
-          waBtn.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`,'_blank');
-          qrEl.parentNode.insertBefore(waBtn, qrEl.nextSibling);
+        // Este bloque se ejecuta tan pronto como este script se parsea,
+        // después de que socket.io.js ha sido cargado.
+        if (typeof io === 'undefined') {
+            showMessage('Error crítico: El cliente de Socket.IO no se ha cargado correctamente. Por favor, revisa la conexión de red y la configuración del servidor.', 'error');
+            console.error("El objeto 'io' de Socket.IO es indefinido. No se puede continuar con la funcionalidad de Socket.IO.");
+            // No se inicializa 'socket' y el resto de la lógica dependiente de 'socket'
+            // en DOMContentLoaded deberá manejar 'socket' como indefinido.
         } else {
-          waBtn.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`,'_blank');
+            socket = io(); // Inicializa 'socket' aquí si 'io' está disponible.
         }
-      }
 
-      /* ---------- SPOTIFY ---------- */
+        // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
+        window.addEventListener('DOMContentLoaded', () => {
+            // Si 'socket' no se pudo inicializar (porque 'io' no estaba definido), no continuar con la lógica que lo usa
+            if (typeof socket === 'undefined') {
+                console.error("Socket no se inicializó correctamente en DOMContentLoaded. Abortando lógica dependiente del DOM.");
+                // Retorna para evitar errores en cascada.
+                return;
+            }
 
-      async function getPlaylistTracks(playlistId) {
-        const token = await fetchToken();
-        let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
-        const tracks = [];
-        while (url) {
-          const r = await fetch(url, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const d = await r.json();
-          tracks.push(
-            ...d.items.map((it) => ({
-              name: it.track.name,
-              artist: it.track.artists.map((a) => a.name).join(", "),
-              preview: it.track.preview_url,
-            }))
-          );
-          url = d.next;
-        }
-        return tracks;
-      }
+            let currentSessionId = null;
+            let userId = null; // Generado en el lado del cliente para cada jugador que se une a una sesión
+            let currentBingoCard = []; // Almacena el cartón de bingo del jugador
+            let markedSongs = new Set(); // Almacena los IDs de las canciones marcadas por el jugador actual
 
-      async function fetchToken() {
-        if (ACCESS_TOKEN) return ACCESS_TOKEN;
-        // Si no hay token (primera vez como admin), pide login a Spotify
-        const redirectUri = location.origin + location.pathname;
-        location.href =
-          `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
-          `&response_type=token&redirect_uri=${encodeURIComponent(
-            redirectUri
-          )}` +
-          `&scope=playlist-read-private`;
-        throw new Error("Redirigiendo a login de Spotify");
-      }
+            const roleSelectionDiv = document.getElementById('role-selection');
+            const adminPanelDiv = document.getElementById('admin-panel');
+            const playerViewDiv = document.getElementById('player-view');
 
-      /* ---------- UTIL ---------- */
-      function shuffle(a) {
-        return a
-          .map((v) => [Math.random(), v])
-          .sort((x, y) => x[0] - y[0])
-          .map((x) => x[1]);
-      }
+            const adminBtn = document.getElementById('admin-btn');
+            const playerBtn = document.getElementById('player-btn');
+
+            const createSessionBtn = document.getElementById('create-session-btn');
+            const playlistUrlInput = document.getElementById('playlist-url');
+            const sessionIdDisplay = document.getElementById('session-id-display');
+            const joinLink = document.getElementById('join-link');
+            const qrcodeDiv = document.getElementById('qrcode');
+            const sessionInfoDiv = document.getElementById('session-info');
+            const audioPlayer = document.getElementById('audio-player');
+            const playPauseBtn = document.getElementById('play-pause-btn');
+            const nextSongBtn = document.getElementById('next-song-btn');
+            const currentSongInfo = document.getElementById('current-song-info');
+            const checkWinnersBtn = document.getElementById('check-winners-btn');
+            const winnerDisplay = document.getElementById('winner-display');
+
+            const joinSessionIdInput = document.getElementById('join-session-id');
+            const joinSessionBtn = document.getElementById('join-session-btn');
+            const gameAreaDiv = document.getElementById('game-area');
+            const bingoCardDiv = document.getElementById('bingo-card');
+            const markedCountSpan = document.getElementById('marked-count');
+            const linesCountSpan = document.getElementById('lines-count');
+            const winMessageDiv = document.getElementById('win-message');
+
+            // --- Lógica de Selección de Rol ---
+            adminBtn.addEventListener('click', () => {
+                roleSelectionDiv.classList.add('hidden');
+                adminPanelDiv.classList.remove('hidden');
+                // Informa al servidor que este socket es un admin
+                socket.emit('setRole', { role: 'admin' });
+            });
+
+            playerBtn.addEventListener('click', () => {
+                roleSelectionDiv.classList.add('hidden');
+                playerViewDiv.classList.remove('hidden');
+                // Informa al servidor que este socket es un jugador
+                socket.emit('setRole', { role: 'player' });
+                // Si la URL contiene el ID de sesión, unirse automáticamente
+                const urlParams = new URLSearchParams(window.location.search);
+                const sid = urlParams.get('sid');
+                if (sid) {
+                    joinSessionIdInput.value = sid;
+                    joinSessionBtn.click(); // Dispara la unión
+                }
+            });
+
+            // --- Lógica de Admin ---
+            createSessionBtn.addEventListener('click', () => {
+                const playlistUrl = playlistUrlInput.value.trim();
+                if (playlistUrl) {
+                    showMessage('Creando sesión y obteniendo playlist...', 'info');
+                    socket.emit('createSession', { playlistUrl });
+                } else {
+                    showMessage('Por favor, introduce una URL de playlist válida.');
+                }
+            });
+
+            socket.on('sessionCreated', ({ sessionId, joinUrl }) => {
+                currentSessionId = sessionId;
+                sessionIdDisplay.textContent = sessionId;
+                joinLink.href = joinUrl;
+                joinLink.textContent = joinUrl;
+                sessionInfoDiv.classList.remove('hidden');
+                showMessage('Sesión creada con éxito. Comparte el enlace.', 'success');
+
+                // Generar código QR
+                new QRCode(qrcodeDiv, {
+                    text: joinUrl,
+                    width: 128,
+                    height: 128,
+                    colorDark : "#1d3557",
+                    colorLight : "#f1faee",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            });
+
+            socket.on('sessionError', (message) => {
+                showMessage(message);
+            });
+
+            playPauseBtn.addEventListener('click', () => {
+                if (!currentSessionId) {
+                    showMessage('Primero debes crear o unirte a una sesión.');
+                    return;
+                }
+                if (audioPlayer.paused) {
+                    socket.emit('playSong', { sessionId: currentSessionId });
+                } else {
+                    socket.emit('pauseSong', { sessionId: currentSessionId });
+                }
+            });
+
+            nextSongBtn.addEventListener('click', () => {
+                if (!currentSessionId) {
+                    showMessage('Primero debes crear o unirte a una sesión.');
+                    return;
+                }
+                socket.emit('nextSong', { sessionId: currentSessionId });
+            });
+
+            checkWinnersBtn.addEventListener('click', () => {
+                if (!currentSessionId) {
+                    showMessage('Primero debes crear o unirte a una sesión.');
+                    return;
+                }
+                socket.emit('checkWinners', { sessionId: currentSessionId });
+            });
+
+            socket.on('songUpdate', ({ previewUrl, songTitle, isPlaying }) => {
+                currentSongInfo.textContent = songTitle || 'Ninguna';
+                if (previewUrl) {
+                    audioPlayer.src = previewUrl;
+                    audioPlayer.classList.remove('hidden');
+                    if (isPlaying) {
+                        audioPlayer.play().catch(e => console.error("Error al reproducir audio:", e));
+                        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+                        playPauseBtn.classList.remove('btn-green');
+                        playPauseBtn.classList.add('btn');
+                    } else {
+                        audioPlayer.pause();
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Iniciar';
+                        playPauseBtn.classList.remove('btn');
+                        playPauseBtn.classList.add('btn-green');
+                    }
+                } else {
+                    audioPlayer.pause();
+                    audioPlayer.src = '';
+                    audioPlayer.classList.add('hidden');
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Iniciar';
+                    playPauseBtn.classList.remove('btn');
+                    playPauseBtn.classList.add('btn-green');
+                }
+            });
+
+            socket.on('winnersFound', ({ winners }) => {
+                if (winners.length > 0) {
+                    winnerDisplay.textContent = `¡Ganador(es) de BINGO: ${winners.join(', ')}!`;
+                    showMessage(`¡BINGO! Ganador(es): ${winners.join(', ')}`, 'success');
+                } else {
+                    winnerDisplay.textContent = 'Aún no hay ganadores de BINGO.';
+                    showMessage('Aún no hay ganadores de BINGO.', 'info');
+                }
+            });
+
+            // --- Lógica de Jugador ---
+            joinSessionBtn.addEventListener('click', () => {
+                const sid = joinSessionIdInput.value.trim();
+                if (sid) {
+                    // Generar un ID de usuario único para este jugador
+                    userId = 'player_' + Math.random().toString(36).substring(2, 9);
+                    showMessage(`Uniéndote a la sesión ${sid}...`, 'info');
+                    socket.emit('joinSession', { sessionId: sid, userId: userId });
+                } else {
+                    showMessage('Por favor, introduce un ID de sesión.');
+                }
+            });
+
+            socket.on('sessionJoined', ({ sessionId, bingoCard, currentTrack, isPlaying }) => {
+                currentSessionId = sessionId;
+                currentBingoCard = bingoCard;
+                markedSongs.clear(); // Limpia canciones marcadas previamente para la nueva sesión
+                winMessageDiv.classList.add('hidden'); // Oculta el mensaje de victoria en la nueva sesión
+
+                document.getElementById('join-session-section').classList.add('hidden');
+                gameAreaDiv.classList.remove('hidden');
+                showMessage(`Te has unido a la sesión ${sessionId}. ¡Que empiece el juego!`, 'success');
+
+                renderBingoCard(bingoCard);
+                updatePlayerStats();
+                // Actualiza el estado inicial de la canción para nuevos jugadores
+                socket.emit('requestCurrentSong', { sessionId: currentSessionId });
+                socket.emit('requestPlayerState', { sessionId: currentSessionId, userId: userId });
+            });
+
+            socket.on('updateBingoCard', ({ markedCells, linesCompleted, isBingo, userId: updatedUserId }) => {
+                if (updatedUserId === userId) { // Solo actualiza si es para este jugador
+                    markedSongs = new Set(markedCells);
+                    renderBingoCard(currentBingoCard); // Vuelve a renderizar para actualizar el estado marcado
+                    updatePlayerStats();
+
+                    if (isBingo) {
+                        winMessageDiv.classList.remove('hidden');
+                        showMessage('¡BINGO! Has ganado.', 'success');
+                    } else {
+                        winMessageDiv.classList.add('hidden');
+                    }
+                }
+            });
+
+            socket.on('currentSongState', ({ previewUrl, songTitle, isPlaying }) => {
+                // Los jugadores no reproducen audio, pero necesitan saber qué canción está "activa" para marcar
+                // El reproductor de audio del admin se maneja con el evento songUpdate.
+                // Este evento es principalmente para que los nuevos jugadores se sincronicen.
+                console.log("Estado de la canción actual recibido por el jugador:", songTitle, "está sonando:", isPlaying);
+            });
+
+            // Maneja el estado del jugador para los jugadores recién unidos
+            socket.on('playerState', ({ markedSongs: playerMarkedSongs, linesCompleted, isBingo }) => {
+                markedSongs = new Set(playerMarkedSongs);
+                renderBingoCard(currentBingoCard);
+                updatePlayerStats();
+                if (isBingo) {
+                    winMessageDiv.classList.remove('hidden');
+                } else {
+                    winMessageDiv.classList.add('hidden');
+                }
+            });
+
+
+            function renderBingoCard(card) {
+                bingoCardDiv.innerHTML = '';
+                card.forEach(song => {
+                    const cell = document.createElement('div');
+                    cell.classList.add('bingo-cell', 'rounded-lg', 'shadow-md');
+                    if (markedSongs.has(song.id)) {
+                        cell.classList.add('marked');
+                    }
+                    cell.dataset.songId = song.id;
+                    cell.innerHTML = `
+                        <p class="font-bold">${song.title}</p>
+                        <p class="text-sm">${song.artist}</p>
+                    `;
+                    cell.addEventListener('click', () => {
+                        if (!currentSessionId) {
+                            showMessage('No estás en una sesión activa.');
+                            return;
+                        }
+                        if (cell.classList.contains('marked')) {
+                            showMessage('Esta canción ya está marcada.');
+                            return;
+                        }
+                        // Informa al servidor sobre el clic
+                        socket.emit('markSong', {
+                            sessionId: currentSessionId,
+                            userId: userId,
+                            songId: song.id
+                        });
+                    });
+                    bingoCardDiv.appendChild(cell);
+                });
+            }
+
+            function updatePlayerStats() {
+                markedCountSpan.textContent = markedSongs.size;
+
+                // Calcula líneas (solo comprobación horizontal por ahora)
+                let lines = 0;
+                const size = 5; // Cartón de bingo 5x5
+                const cardArray = Array.from(currentBingoCard); // Convierte Set a Array si es necesario
+
+                // Ayuda para comprobar si un conjunto de índices están todos marcados
+                const areAllMarked = (indices) => {
+                    return indices.every(index => markedSongs.has(cardArray[index].id));
+                };
+
+                // Comprobar líneas horizontales
+                for (let i = 0; i < size; i++) {
+                    const rowIndices = Array.from({ length: size }, (_, j) => i * size + j);
+                    if (areAllMarked(rowIndices)) {
+                        lines++;
+                    }
+                }
+
+                // Comprobar líneas verticales
+                for (let j = 0; j < size; j++) {
+                    const colIndices = Array.from({ length: size }, (_, i) => i * size + j);
+                    if (areAllMarked(colIndices)) {
+                        lines++;
+                    }
+                }
+
+                // Comprobar diagonal 1 (arriba-izquierda a abajo-derecha)
+                const diag1Indices = Array.from({ length: size }, (_, i) => i * size + i);
+                if (areAllMarked(diag1Indices)) {
+                    lines++;
+                }
+
+                // Comprobar diagonal 2 (arriba-derecha a abajo-izquierda)
+                const diag2Indices = Array.from({ length: size }, (_, i) => i * size + (size - 1 - i));
+                if (areAllMarked(diag2Indices)) {
+                    lines++;
+                }
+
+
+                linesCountSpan.textContent = lines;
+            }
+        }); // Fin del listener de DOMContentLoaded
     </script>
-  </body>
+</body>
 </html>

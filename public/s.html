@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bingo Musical</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h2>Bingo Musical</h2>
+
+    <!-- ADMIN PANEL -->
+    <section id="admin">
+      <input id="playlistUrl" placeholder="URL de playlist pública" />
+      <button id="load">Cargar</button>
+      <span id="status"></span>
+      <div id="qr"></div>
+    </section>
+
+    <!-- PLAYER BOARD -->
+    <section id="player" hidden>
+      <h3 id="title"></h3>
+      <div id="board" class="grid"></div>
+      <p id="linea"></p>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script>
+      /* ---------- CONFIGÚRALO COMO MÁS TE PLAZCA ---------- */
+      const CLIENT_ID = "7e17927393ac4860a8dc204cb7144c19";
+      // --- identificación de la sesión (si viene ?s=abcd en la URL) ---
+      const params = new URLSearchParams(location.search);
+      const shareId = params.get("s"); // null si no existe
+      // Si viene ?t= (tracks base64) y aún no tenemos la sesión en localStorage, la restauramos
+      const encodedTracks = params.get("t");
+      if (
+        shareId &&
+        encodedTracks &&
+        !localStorage.getItem("bingo_" + shareId)
+      ) {
+        try {
+          const json =
+            LZString.decompressFromEncodedURIComponent(encodedTracks);
+          const slim = JSON.parse(json); // [[name, artist], ...]
+          const full = slim.map(([name, artist]) => ({ name, artist }));
+          localStorage.setItem("bingo_" + shareId, JSON.stringify(full));
+        } catch (e) {
+          console.error("No pude decodificar las pistas", e);
+        }
+      }
+      // --- acceso Spotify para el ADMIN (flujo implicit) ---
+      let ACCESS_TOKEN = null;
+      const hash = new URLSearchParams(location.hash.substring(1));
+      if (hash.has("access_token")) {
+        ACCESS_TOKEN = hash.get("access_token");
+        sessionStorage.setItem("spot_access", ACCESS_TOKEN);
+        // limpia el fragmento #access_token=...
+        history.replaceState(null, "", location.pathname + location.search);
+      } else {
+        ACCESS_TOKEN = sessionStorage.getItem("spot_access");
+      }
+      /* ---------------------------------------------------- */
+
+      const adminSec = document.getElementById("admin");
+      const playerSec = document.getElementById("player");
+      const urlField = document.getElementById("playlistUrl");
+      const statusEl = document.getElementById("status");
+      const boardEl = document.getElementById("board");
+      const titleEl = document.getElementById("title");
+      const lineaEl = document.getElementById("linea");
+      const qrEl = document.getElementById("qr");
+
+      if (shareId) {
+        // --------- JUGADOR ----------
+        adminSec.remove();
+        adminSec.hidden = true;
+        joinSession(shareId);
+      } else {
+        // --------- ADMIN ------------
+        document.getElementById("load").onclick = async () => {
+          const playlistUrl = urlField.value.trim();
+          const m = playlistUrl.match(/playlist\/([a-zA-Z0-9]+)/);
+          if (!m) return alert("URL de playlist inválida");
+          const id = m[1];
+          statusEl.textContent = "Cargando…";
+
+          try {
+            const tracks = await getPlaylistTracks(id);
+            if (!tracks.length)
+              throw new Error("Playlist vacía o no accesible");
+            const sessionId = Math.random().toString(36).substring(2, 8);
+            localStorage.setItem("bingo_" + sessionId, JSON.stringify(tracks));
+            makeQR(sessionId, tracks);
+            statusEl.textContent = `Sesión ${sessionId} lista (${tracks.length} canciones). Escanea el QR.`;
+          } catch (e) {
+            statusEl.textContent = "Error al obtener la playlist";
+            console.error(e);
+          }
+        };
+      }
+
+      // Devuelve una copia truncada (máx 120 canciones) si el QR se pasa de capacidad
+      function fitForQR(arr) {
+        const MAX_BYTES = 1200; // límite más estricto para que siempre quepa
+        let n = arr.length;
+        let slim = arr;
+        do {
+          slim = shuffle(arr).slice(0, n);
+          const test = LZString.compressToEncodedURIComponent(
+            JSON.stringify(slim.map((t) => [t.name, t.artist]))
+          );
+          if (test.length <= MAX_BYTES) return slim;
+          n -= 10; // quita 10 pistas y prueba de nuevo
+        } while (n > 25);
+        return slim; // última tentativa
+      }
+
+      // Genera el QR con tamaño dinámico según la longitud y el ancho de pantalla; devuelve true/false
+      function safeQRCode(el, url){
+        const len  = url.length;
+        let size;
+        if      (len > 1100) size = 720;
+        else if (len > 900)  size = 560;
+        else if (len > 600)  size = 400;
+        else                 size = 280;
+
+        // No dejar que sobrepase el 90 % del ancho de la ventana
+        const vw = Math.min(window.innerWidth, window.screen?.availWidth || window.innerWidth);
+        size = Math.min(size, Math.floor(vw * 0.9));
+
+        try{
+          new QRCode(el, { text:url, width:size, height:size, correctLevel:QRCode.CorrectLevel.L });
+          return true;
+        }catch{
+          return false;
+        }
+      }
+
+      /* ---------- FUNCIONES PRINCIPALES ---------- */
+
+      async function joinSession(id) {
+        const raw = localStorage.getItem("bingo_" + id);
+        if (!raw) {
+          titleEl.textContent =
+            "Esta sesión no existe. Pide al anfitrión el QR correcto.";
+          playerSec.hidden = false;
+          return;
+        }
+        const tracks = JSON.parse(raw);
+        const board = shuffle(tracks).slice(0, 25);
+        titleEl.textContent = "Marca las canciones que oigas 👂";
+        board.forEach((t, i) => {
+          const b = document.createElement("div");
+          b.className = "cell";
+          b.textContent = `${t.name} – ${t.artist}`.slice(0,40);
+          b.onclick = () => {
+            b.classList.toggle("mark");
+            checkWin();
+          };
+          boardEl.appendChild(b);
+        });
+        playerSec.hidden = false;
+      }
+
+      function checkWin() {
+        const cells = [...boardEl.children];
+        const marks = cells.map((c) => c.classList.contains("mark"));
+        // línea horizontal
+        let linea = false;
+        for (let r = 0; r < 5; r++) {
+          if (marks.slice(r * 5, r * 5 + 5).every(Boolean)) {
+            linea = true;
+            break;
+          }
+        }
+        lineaEl.textContent = linea ? "¡Línea!" : "";
+        // bingo = 20 marcas
+        const total = marks.filter(Boolean).length;
+        if (total >= 20) alert("🎉 ¡BINGO! Ve a reclamar tu premio");
+      }
+
+      function makeQR(sessionId, tracks) {
+        qrEl.innerHTML = "";
+        const usable = fitForQR(tracks);
+        const slim = usable.map((t) => [t.name, t.artist]);
+        const compressed = LZString.compressToEncodedURIComponent(
+          JSON.stringify(slim)
+        );
+        const shareUrl = `${location.origin}${location.pathname}?s=${sessionId}&t=${compressed}`;
+
+        if (usable.length < tracks.length) {
+          statusEl.textContent = `QR recortado a ${usable.length}/${tracks.length} canciones.`;
+        }
+
+        if (!safeQRCode(qrEl, shareUrl)) {
+          qrEl.innerHTML = `<a href="${shareUrl}">Abrir enlace de la partida</a>`;
+          statusEl.textContent +=
+            " — Lista aún demasiado grande para QR; usa el enlace.";
+        }
+
+        // Crear / actualizar botón de compartir por WhatsApp
+        let waBtn = document.getElementById('waBtn');
+        if (!waBtn){
+          waBtn = document.createElement('button');
+          waBtn.id = 'waBtn';
+          waBtn.textContent = 'Enviar enlace por WhatsApp';
+          waBtn.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`,'_blank');
+          qrEl.parentNode.insertBefore(waBtn, qrEl.nextSibling);
+        } else {
+          waBtn.onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareUrl)}`,'_blank');
+        }
+      }
+
+      /* ---------- SPOTIFY ---------- */
+
+      async function getPlaylistTracks(playlistId) {
+        const token = await fetchToken();
+        let url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+        const tracks = [];
+        while (url) {
+          const r = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const d = await r.json();
+          tracks.push(
+            ...d.items.map((it) => ({
+              name: it.track.name,
+              artist: it.track.artists.map((a) => a.name).join(", "),
+              preview: it.track.preview_url,
+            }))
+          );
+          url = d.next;
+        }
+        return tracks;
+      }
+
+      async function fetchToken() {
+        if (ACCESS_TOKEN) return ACCESS_TOKEN;
+        // Si no hay token (primera vez como admin), pide login a Spotify
+        const redirectUri = location.origin + location.pathname;
+        location.href =
+          `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
+          `&response_type=token&redirect_uri=${encodeURIComponent(
+            redirectUri
+          )}` +
+          `&scope=playlist-read-private`;
+        throw new Error("Redirigiendo a login de Spotify");
+      }
+
+      /* ---------- UTIL ---------- */
+      function shuffle(a) {
+        return a
+          .map((v) => [Math.random(), v])
+          .sort((x, y) => x[0] - y[0])
+          .map((x) => x[1]);
+      }
+    </script>
+  </body>
+</html>
