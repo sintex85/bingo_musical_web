@@ -31,31 +31,14 @@ body{font-family:system-ui, sans-serif;max-width:800px;margin:auto;padding:1rem}
   <p id="linea"></p>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/qrjs2@0.1.0/qr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 /* ---------- CONFIGÚRALO COMO MÁS TE PLAZCA ---------- */
 const CLIENT_ID     = '7e17927393ac4860a8dc204cb7144c19';
 // --- identificación de la sesión (si viene ?s=abcd en la URL) ---
 const params  = new URLSearchParams(location.search);
 const shareId = params.get('s');          // null si no existe
-// const CLIENT_SECRET = '05c4fc646c414094a76d00e05274a026'; // ya no se usa
-/* ---------- AUTORIZACIÓN OAUTH IMPLÍCITA ---------- */
-const hashParams = new URLSearchParams(location.hash.substring(1));
-let SPOT_TOKEN = hashParams.get('access_token') || sessionStorage.getItem('spot_token');
-if (hashParams.get('access_token')) {
-  SPOT_TOKEN = hashParams.get('access_token');
-  sessionStorage.setItem('spot_token', SPOT_TOKEN);
-  // Limpia el fragmento #access_token=… de la URL
-  history.replaceState(null, '', location.pathname + location.search);
-}
-// Si somos ADMIN (no hay shareId) y no hay token, redirige al login de Spotify
-if (!SPOT_TOKEN && !shareId) {
-  const redirectUri = location.origin + location.pathname;
-  location.href =
-    `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}` +
-    `&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}`;
-}
-/* -------------------------------------------------- */
+const CLIENT_SECRET = '05c4fc646c414094a76d00e05274a026';
 /* ---------------------------------------------------- */
 
 const adminSec  = document.getElementById('admin');
@@ -152,8 +135,26 @@ async function getPlaylistTracks(playlistId){
 }
 
 async function fetchToken(){
-  if (!SPOT_TOKEN) throw new Error('Token de Spotify no disponible');
-  return SPOT_TOKEN;
+  const cached = JSON.parse(sessionStorage.getItem('spot_tok') || '{}');
+  if (cached.expires > Date.now()) return cached.access;
+
+  const body = new URLSearchParams();
+  body.append('grant_type','client_credentials');
+
+  const res  = await fetch('https://accounts.spotify.com/api/token',{
+    method:'POST',
+    headers:{
+      'Authorization':'Basic '+btoa(CLIENT_ID+':'+CLIENT_SECRET),
+      'Content-Type':'application/x-www-form-urlencoded'
+    },
+    body
+  });
+  const data = await res.json();
+  sessionStorage.setItem('spot_tok', JSON.stringify({
+    access : data.access_token,
+    expires: Date.now() + (data.expires_in - 30) * 1000
+  }));
+  return data.access_token;
 }
 
 /* ---------- UTIL ---------- */
