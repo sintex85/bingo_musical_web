@@ -306,18 +306,6 @@
             // en DOMContentLoaded deberá manejar 'socket' como indefinido.
         } else {
             socket = io(window.location.origin, { transports: ['polling'] }); // Solo long‑polling en producción.
-            // --- DEBUG CONEXIÓN SOCKET ---
-            socket.on('connect', () => {
-                console.log('[DEBUG] Socket conectado:', socket.id);
-                showMessage('Conexión con el servidor establecida ✔️', 'success');
-            });
-            socket.on('connect_error', (err) => {
-                console.error('[DEBUG] Error de conexión Socket.IO:', err);
-                showMessage('Error al conectar con el servidor Socket.IO. Revisa proxy o firewall.', 'error');
-            });
-            socket.on('disconnect', (reason) => {
-                console.warn('[DEBUG] Socket desconectado:', reason);
-            });
         }
 
         // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
