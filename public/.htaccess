@@ -1,16 +1,14 @@
-### Activa motor de reescritura
 RewriteEngine On
 
-### --- WebSocket /socket.io  --------------------------------
-# Solo para peticiones que llevan Upgrade: websocket
+# --- WebSocket -------------------------------------------------
 RewriteCond %{REQUEST_URI}  ^/socket\.io/ [NC]
-RewriteCond %{HTTP:Upgrade} =websocket   [NC]
+RewriteCond %{HTTP:Upgrade} =websocket    [NC]
 RewriteRule /(.*)           ws://127.0.0.1:3000/$1 [P,L]
 
-### --- Long-polling /socket.io  ------------------------------
+# --- Long-polling ----------------------------------------------
 RewriteCond %{REQUEST_URI}  ^/socket\.io/ [NC]
 RewriteRule /(.*)           http://127.0.0.1:3000/$1 [P,L]
 
-### --- Todo lo demás  ---------------------------------------
+# --- Resto de rutas (SPA) --------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$          http://127.0.0.1:3000/$1 [P,L]
