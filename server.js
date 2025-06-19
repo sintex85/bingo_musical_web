@@ -19,7 +19,10 @@ const io = new Server(server, {
     // En producción sólo usaremos long‑polling; en local mantenemos ambos transportes.
     transports: process.env.NODE_ENV === 'production'
         ? ["polling"]
-        : ["polling", "websocket"]
+        : ["polling", "websocket"],
+    // Desactivamos la entrega del cliente integrado de Socket.IO;
+    // en producción lo cargamos desde CDN para evitar que Apache lo sirva mal.
+    serveClient: false
 });
 
 const PORT = process.env.PORT || 3000;
@@ -28,8 +31,8 @@ console.log('[BOOT] NODE_ENV:', process.env.NODE_ENV);
 // --------------------
 
 // Spotify API credentials from environment variables
-const SPOTIFY_CLIENT_ID = "7e17927393ac4860a8dc204cb7144c19";
-const SPOTIFY_CLIENT_SECRET = "05c4fc646c414094a76d00e05274a026"; // Hardcoded for now, but should be in .env in production
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 console.log('[BOOT] SPOTIFY_CLIENT_ID present:', !!SPOTIFY_CLIENT_ID);
 
 let spotifyAccessToken = '';
