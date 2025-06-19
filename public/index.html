@@ -338,8 +338,6 @@
     </div>
 
     <!-- Mueve los scripts de las librerías al final del body -->
-    <!-- Incluye el cliente de Socket.IO del propio servidor antes de usar io() -->
-    <script src="/socket.io/socket.io.js"></script>
     <!-- Se usa un CDN para Socket.IO para mayor fiabilidad en la carga -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
@@ -377,7 +375,7 @@
         // No se inicializa 'socket' y el resto de la lógica dependiente de 'socket'
         // en DOMContentLoaded deberá manejar 'socket' como indefinido.
       } else {
-        socket = io("https://bingo.naranjas-ecologicas.com", {
+        socket = io({
           transports: ["websocket"],
           path: "/socket.io",
         });
