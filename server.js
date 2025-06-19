@@ -498,8 +498,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log('Ensure you have SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET set in your .env file.');
-    console.log(`Admin Panel: http://localhost:${PORT}`);
-    console.log(`Public URL: Configure PUBLIC_URL in .env if deploying (e.g., PUBLIC_URL=https://yourdomain.com)`);
+    console.log(`PUBLIC_URL loaded from .env: ${process.env.PUBLIC_URL}`);
 })
