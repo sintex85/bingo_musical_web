@@ -232,7 +232,7 @@ io.on('connection', (socket) => {
                 adminAudioPlayer: null // To store the timeout for 30s preview
             };
 
-            const joinUrl = `${process.env.PUBLIC_URL || `http://localhost:${PORT}`}?sid=${sessionId}`;
+            const joinUrl = `${(process.env.PUBLIC_URL || `http://localhost:${PORT}`).replace(/\/+$/, '')}?sid=${sessionId}`;
             socket.emit('sessionCreated', { sessionId, joinUrl });
             console.log(`Session ${sessionId} created by admin ${socket.id}`);
         } catch (error) {
