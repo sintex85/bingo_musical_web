@@ -25,12 +25,12 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 // ---- DEBUG BOOT ----
 console.log('[BOOT] NODE_ENV:', process.env.NODE_ENV);
-console.log('[BOOT] SPOTIFY_CLIENT_ID present:', !!SPOTIFY_CLIENT_ID);
 // --------------------
 
 // Spotify API credentials from environment variables
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
+console.log('[BOOT] SPOTIFY_CLIENT_ID present:', !!SPOTIFY_CLIENT_ID);
 
 let spotifyAccessToken = '';
 let tokenExpiryTime = 0;
