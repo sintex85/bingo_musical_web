@@ -11,10 +11,7 @@ const axios = require('axios');
 const path = require('path');
 
 const app = express();
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/bingo.naranjas-ecologicas.com/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/bingo.naranjas-ecologicas.com/fullchain.pem', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
-const server = https.createServer(credentials, app);
+const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
@@ -505,5 +502,5 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
     console.log(`PUBLIC_URL loaded from .env: ${process.env.PUBLIC_URL}`);
-    console.log(`Server is running securely on ${(process.env.PUBLIC_URL || `https://localhost:${PORT}`).replace(/\/+$/, '')}`);
+    console.log(`Server is running on ${(process.env.PUBLIC_URL || `http://localhost:${PORT}`).replace(/\/+$/, '')}`);
 })
