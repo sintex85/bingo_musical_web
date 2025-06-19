@@ -304,7 +304,7 @@
             // No se inicializa 'socket' y el resto de la lógica dependiente de 'socket'
             // en DOMContentLoaded deberá manejar 'socket' como indefinido.
         } else {
-            socket = io(); // Inicializa 'socket' aquí si 'io' está disponible.
+            socket = io('http://localhost:3000'); // Inicializa 'socket' aquí si 'io' está disponible.
         }
 
         // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
