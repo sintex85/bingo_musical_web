@@ -1,7 +1,6 @@
 
 
-const https = require('https');
-const fs = require('fs');
+const http = require('http');
 // server.js
 require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
@@ -11,15 +10,7 @@ const axios = require('axios');
 const path = require('path');
 
 const app = express();
-let server;
-if (process.env.NODE_ENV === 'production') {
-    const privateKey = fs.readFileSync('/etc/letsencrypt/live/bingo.naranjas-ecologicas.com/privkey.pem', 'utf8');
-    const certificate = fs.readFileSync('/etc/letsencrypt/live/bingo.naranjas-ecologicas.com/fullchain.pem', 'utf8');
-    const credentials = { key: privateKey, cert: certificate };
-    server = https.createServer(credentials, app);
-} else {
-    server = http.createServer(app);
-}
+const server = http.createServer(app);
 const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
