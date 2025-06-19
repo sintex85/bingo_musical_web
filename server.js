@@ -499,4 +499,5 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
     console.log(`PUBLIC_URL loaded from .env: ${process.env.PUBLIC_URL}`);
+    console.log(`Server is running on${(process.env.PUBLIC_URL || `http://localhost:${PORT}`).replace(/\/+$/, '')}`);
 })
