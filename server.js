@@ -53,8 +53,12 @@ const sessions = {};
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Fallback for any other route to serve index.html (for client-side routing)
-app.get('/:path(*)', (req, res) => {
+// Fallback for client‑side routing, but ignore Socket.IO and asset requests
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/socket.io')) {
+        // Let Socket.IO or subsequent middleware handle it
+        return next();
+    }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
