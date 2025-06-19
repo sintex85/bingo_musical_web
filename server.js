@@ -15,10 +15,18 @@ const io = new Server(server, {
         origin: "*",
         methods: ["GET", "POST"]
     },
-    transports: ["polling", "websocket"]
+    // In many shared‑hosting setups Apache no permite WebSocket (proxy_wstunnel deshabilitado).
+    // En producción sólo usaremos long‑polling; en local mantenemos ambos transportes.
+    transports: process.env.NODE_ENV === 'production'
+        ? ["polling"]
+        : ["polling", "websocket"]
 });
 
 const PORT = process.env.PORT || 3000;
+// ---- DEBUG BOOT ----
+console.log('[BOOT] NODE_ENV:', process.env.NODE_ENV);
+console.log('[BOOT] SPOTIFY_CLIENT_ID present:', !!SPOTIFY_CLIENT_ID);
+// --------------------
 
 // Spotify API credentials from environment variables
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
@@ -69,6 +77,7 @@ async function getSpotifyAccessToken() {
     }
 
     try {
+        console.log('[STEP-2] Requesting Spotify token');
         const response = await axios.post('https://accounts.spotify.com/api/token',
             new URLSearchParams({
                 grant_type: 'client_credentials'
@@ -79,6 +88,7 @@ async function getSpotifyAccessToken() {
                 }
             });
         spotifyAccessToken = response.data.access_token;
+        console.log('[STEP-3] Spotify token OK');
         tokenExpiryTime = Date.now() + (response.data.expires_in * 1000) - 60000; // Subtract 1 minute to refresh proactively
         console.log('Spotify access token obtained.');
         return spotifyAccessToken;
@@ -211,6 +221,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createSession', async ({ playlistUrl }) => {
+        console.log('[STEP-1] createSession recibido');
         console.log(`[createSession] Role: ${userRole}, Socket: ${socket.id}, URL: ${playlistUrl}`);
         if (userRole !== 'admin') {
             socket.emit('sessionError', 'Solo los administradores pueden crear sesiones.');
@@ -225,6 +236,7 @@ io.on('connection', (socket) => {
 
         try {
             const allSongs = await getPlaylistTracks(playlistId);
+            console.log('[STEP-4] Canciones obtenidas:', allSongs.length);
             if (allSongs.length < 25) {
                 socket.emit('sessionError', `La playlist debe tener al menos 25 canciones. Solo se encontraron ${allSongs.length}.`);
                 return;
