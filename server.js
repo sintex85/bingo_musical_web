@@ -123,6 +123,8 @@ async function testFirestoreConnection() {
 // Llamar la función de prueba al iniciar
 testFirestoreConnection()
 
-server.listen(3000, () => {
-  console.log('Servidor escuchando en puerto 3000')
+const PORT = process.env.PORT || 3001; // Cambiar de 3000 a 3001
+
+server.listen(PORT, () => {
+  console.log(`Servidor escuchando en puerto ${PORT}`)
 })
