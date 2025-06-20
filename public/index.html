@@ -62,17 +62,6 @@
         <div class="game-status mt-6">
           <p>Canción Actual: <span id="current-song-info">Ninguna</span></p>
         </div>
-        <div class="admin-controls mt-4">
-          <button id="play-pause-btn" class="btn btn-green">
-            <i class="fas fa-play"></i> Iniciar
-          </button>
-          <button id="next-song-btn" class="btn btn-blue">
-            <i class="fas fa-forward"></i> Siguiente Canción
-          </button>
-          <button id="check-winners-btn" class="btn">
-            <i class="fas fa-trophy"></i> Verificar Ganadores
-          </button>
-        </div>
         <audio id="audio-player" class="w-full mt-4 rounded-lg hidden"></audio>
         <div
           id="winner-display"
@@ -263,61 +252,6 @@
           showMessage(message);
         });
 
-        playPauseBtn.addEventListener("click", () => {
-          if (!currentSessionId) {
-            showMessage("Primero debes crear o unirte a una sesión.");
-            return;
-          }
-          if (audioPlayer.paused) {
-            socket.emit("playSong", { sessionId: currentSessionId });
-          } else {
-            socket.emit("pauseSong", { sessionId: currentSessionId });
-          }
-        });
-
-        nextSongBtn.addEventListener("click", () => {
-          if (!currentSessionId) {
-            showMessage("Primero debes crear o unirte a una sesión.");
-            return;
-          }
-          socket.emit("nextSong", { sessionId: currentSessionId });
-        });
-
-        checkWinnersBtn.addEventListener("click", () => {
-          if (!currentSessionId) {
-            showMessage("Primero debes crear o unirte a una sesión.");
-            return;
-          }
-          socket.emit("checkWinners", { sessionId: currentSessionId });
-        });
-
-        socket.on("songUpdate", ({ previewUrl, songTitle, isPlaying }) => {
-          currentSongInfo.textContent = songTitle || "Ninguna";
-          if (previewUrl) {
-            audioPlayer.src = previewUrl;
-            audioPlayer.classList.remove("hidden");
-            if (isPlaying) {
-              audioPlayer
-                .play()
-                .catch((e) => console.error("Error al reproducir audio:", e));
-              playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pausar';
-              playPauseBtn.classList.remove("btn-green");
-              playPauseBtn.classList.add("btn");
-            } else {
-              audioPlayer.pause();
-              playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Iniciar';
-              playPauseBtn.classList.remove("btn");
-              playPauseBtn.classList.add("btn-green");
-            }
-          } else {
-            audioPlayer.pause();
-            audioPlayer.src = "";
-            audioPlayer.classList.add("hidden");
-            playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Iniciar';
-            playPauseBtn.classList.remove("btn");
-            playPauseBtn.classList.add("btn-green");
-          }
-        });
 
         socket.on("winnersFound", ({ winners }) => {
           if (winners.length > 0) {
