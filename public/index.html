@@ -123,7 +123,15 @@
         // No se inicializa 'socket' y el resto de la lógica dependiente de 'socket'
         // en DOMContentLoaded deberá manejar 'socket' como indefinido.
       } else {
-        socket = io(window.location.origin, { transports: ["polling"] }); // Solo long‑polling en producción.
+        // Conectar al puerto correcto según el entorno
+        const socketUrl = window.location.hostname === 'localhost' ? 
+          'http://localhost:3001' : 
+          window.location.origin;
+        socket = io(socketUrl, { 
+          transports: ["websocket", "polling"],
+          upgrade: true,
+          rememberUpgrade: true
+        });
       }
 
       // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen

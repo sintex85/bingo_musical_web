@@ -14,7 +14,13 @@ const db = admin.firestore()
 
 const app = express()
 const server = http.createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+  cors: {
+    origin: ["https://kikobingo.com", "http://localhost:3001"],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+})
 
 // Configurar Spotify API con variables de entorno
 const spotifyApi = new SpotifyWebApi({
@@ -174,8 +180,9 @@ async function testFirestoreConnection() {
 // Llamar la función de prueba al iniciar
 testFirestoreConnection()
 
-const PORT = process.env.PORT || 3001; // Cambiar de 3000 a 3001
+const PORT = process.env.PORT || 3001;
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor escuchando en puerto ${PORT}`)
+  console.log(`Servidor disponible en http://0.0.0.0:${PORT}`)
 })
