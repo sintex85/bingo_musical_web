@@ -42,7 +42,7 @@ io.on('connection', socket => {
       sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
       console.log('Sesión guardada en memoria:', sessions[sessionId])
       
-      const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3000'}?sid=${sessionId}`
+      const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3001'}?sid=${sessionId}`
       console.log('JoinUrl generado:', joinUrl)
 
       console.log('=== INTENTANDO GUARDAR EN FIRESTORE ===')
