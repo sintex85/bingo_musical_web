@@ -65,6 +65,7 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
     return songs
   } catch (error) {
     console.error('❌ Error obteniendo playlist de Spotify:', error.message)
+    console.error('❌ Error stack:', error.stack)
     console.error('Usando canciones de ejemplo...')
     // Fallback a canciones de ejemplo
     return [
