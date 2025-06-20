@@ -614,6 +614,106 @@ label {
     display: inline-flex;
 }
 
+/* Lista de canciones para el admin */
+#admin-song-list {
+    background: var(--surface-light);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 24px;
+}
+
+#admin-song-list h3 {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-song-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--background-dark);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--surface-color);
+}
+
+.admin-song-item:hover {
+    background: var(--surface-color);
+    transform: translateX(4px);
+}
+
+.admin-song-item.played {
+    background: var(--success-color);
+    border-color: var(--success-hover);
+}
+
+.admin-song-item.played .song-title,
+.admin-song-item.played .song-artist {
+    color: var(--background-dark);
+}
+
+.admin-song-item.played .song-status i {
+    color: var(--background-dark);
+}
+
+.song-number {
+    background: var(--primary-color);
+    color: var(--text-primary);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.song-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.song-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-artist {
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-status {
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.song-status i {
+    color: var(--text-muted);
+    font-size: 8px;
+    transition: color 0.2s ease;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
@@ -683,6 +783,36 @@ label {
     #new-session-section h3 {
         font-size: 18px;
         margin-bottom: 20px;
+    }
+    
+    #admin-song-list {
+        padding: 16px;
+        margin-top: 20px;
+    }
+    
+    #admin-song-list h3 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .admin-song-item {
+        padding: 10px 12px;
+        margin-bottom: 6px;
+    }
+    
+    .song-number {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        margin-right: 10px;
+    }
+    
+    .song-title {
+        font-size: 13px;
+    }
+    
+    .song-artist {
+        font-size: 11px;
     }
 }
 

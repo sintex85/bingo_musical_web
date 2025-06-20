@@ -76,6 +76,14 @@
           
           <div id="qrcode" class="qr-code-container mx-auto"></div>
           
+          <!-- Lista de canciones para seguimiento del admin -->
+          <div id="admin-song-list" class="mt-6">
+            <h3 class="text-lg font-bold mb-4 text-center">Llista de Cançons del Bingo</h3>
+            <div id="song-list-container" class="space-y-2">
+              <!-- Las canciones se insertarán aquí -->
+            </div>
+          </div>
+          
           <!-- Nueva sección para crear otra sesión -->
           <div id="new-session-section" class="mt-8 pt-6 border-t border-gray-600">
             <button id="new-session-btn" class="btn btn-primary">
@@ -243,15 +251,24 @@
           }
         });
 
-        socket.on("sessionCreated", ({ sessionId, joinUrl }) => {
+        socket.on("sessionCreated", ({ sessionId, joinUrl, songs }) => {
           currentSessionId = sessionId;
           sessionIdDisplay.textContent = sessionId;
           joinLink.href = joinUrl;
           joinLink.textContent = joinUrl;
           sessionInfoDiv.classList.remove("hidden");
           
+          // Guardar las canciones para el admin
+          if (!sessions[currentSessionId]) {
+            sessions[currentSessionId] = {};
+          }
+          sessions[currentSessionId].songs = songs;
+          
           // Ocultar la sección inicial de crear sesión
           document.getElementById("create-session-section").classList.add("hidden");
+          
+          // Mostrar lista de canciones para el admin
+          renderAdminSongList();
           
           showMessage(
             "Sessió creada amb èxit. Comparteix l'enllaç.",
@@ -378,6 +395,37 @@
             showMessage("¡LÍNEA! Has marcat exactament 5 cançons.", "info");
           } else {
             winMessageDiv.classList.add("hidden");
+          }
+        }
+
+        // Función para renderizar la lista de canciones del admin
+        function renderAdminSongList() {
+          const songListContainer = document.getElementById("song-list-container");
+          songListContainer.innerHTML = "";
+          
+          if (sessions[currentSessionId] && sessions[currentSessionId].songs) {
+            const songs = sessions[currentSessionId].songs;
+            
+            songs.forEach((song, index) => {
+              const songItem = document.createElement("div");
+              songItem.classList.add("admin-song-item");
+              songItem.innerHTML = `
+                <span class="song-number">${index + 1}</span>
+                <div class="song-info">
+                  <div class="song-title">${song.title}</div>
+                  <div class="song-artist">${song.artist}</div>
+                </div>
+                <div class="song-status">
+                  <i class="fas fa-circle"></i>
+                </div>
+              `;
+              
+              songItem.addEventListener("click", () => {
+                songItem.classList.toggle("played");
+              });
+              
+              songListContainer.appendChild(songItem);
+            });
           }
         }
 
