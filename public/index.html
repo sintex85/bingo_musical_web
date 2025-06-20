@@ -144,7 +144,6 @@
         let currentSessionId = null;
         let userId = null; // Generado en el lado del cliente para cada jugador que se une a una sesión
         let currentBingoCard = []; // Almacena el cartón de bingo del jugador
-        let markedSongs = new Set(); // Almacena los IDs de las canciones marcadas por el jugador actual
 
         const adminPanelDiv = document.getElementById("admin-panel");
         const playerViewDiv = document.getElementById("player-view");
@@ -223,7 +222,6 @@
           ({ sessionId, bingoCard, currentTrack, isPlaying }) => {
             currentSessionId = sessionId;
             currentBingoCard = bingoCard;
-            markedSongs.clear(); // Limpia canciones marcadas previamente para la nueva sesión
             winMessageDiv.classList.add("hidden"); // Oculta el mensaje de victoria en la nueva sesión
 
             document
@@ -251,7 +249,6 @@
           ({ markedCells, linesCompleted, isBingo, userId: updatedUserId }) => {
             if (updatedUserId === userId) {
               // Solo actualiza si es para este jugador
-              markedSongs = new Set(markedCells);
               renderBingoCard(currentBingoCard); // Vuelve a renderizar para actualizar el estado marcado
               updatePlayerStats();
 
@@ -272,9 +269,6 @@
           card.forEach((song) => {
             const cell = document.createElement("div");
             cell.classList.add("bingo-cell", "rounded-lg", "shadow-md");
-            if (markedSongs.has(song.id)) {
-              cell.classList.add("marked");
-            }
             cell.dataset.songId = song.id;
             cell.innerHTML = `
                         <p class="font-bold">${song.title}</p>
@@ -291,8 +285,11 @@
         }
 
         function updatePlayerStats() {
-          // Actualiza el contador de canciones marcadas
-          markedCountSpan.textContent = markedSongs.size;
+          // Obtiene todas las celdas del cartón
+          const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
+          // Cuenta marcadas
+          const totalMarked = Array.from(cells).filter(cell => cell.classList.contains("marked")).length;
+          markedCountSpan.textContent = totalMarked + " / 20";
 
           // Configuración del cartón: 4 filas x 5 columnas = 20 canciones
           const rows = 4;
@@ -301,22 +298,21 @@
 
           // Comprueba cada fila horizontal
           for (let r = 0; r < rows; r++) {
-            let count = 0;
+            let markedInRow = 0;
             for (let c = 0; c < cols; c++) {
               const idx = r * cols + c;
-              const songId = currentBingoCard[idx].id;
-              if (markedSongs.has(songId)) count++;
+              if (cells[idx].classList.contains("marked")) markedInRow++;
             }
-            if (count === cols) lines++;
+            if (markedInRow === cols) lines++;
           }
           linesCountSpan.textContent = lines;
 
-          // Comprueba bingo completo (todas las canciones marcadas)
-          if (markedSongs.size === currentBingoCard.length) {
-            winMessageDiv.classList.remove('hidden');
-            showMessage('¡BINGO! Has completado todas las canciones.', 'success');
+          // Comprueba bingo completo
+          if (totalMarked === cells.length) {
+            winMessageDiv.classList.remove("hidden");
+            showMessage("¡BINGO! Has completado todas las canciones.", "success");
           } else {
-            winMessageDiv.classList.add('hidden');
+            winMessageDiv.classList.add("hidden");
           }
         }
       // Decide vista según presence de sid en la URL
