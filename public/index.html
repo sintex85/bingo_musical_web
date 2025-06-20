@@ -259,13 +259,10 @@
           sessionInfoDiv.classList.remove("hidden");
           
           // Guardar las canciones para el admin
-          if (!sessions[currentSessionId]) {
-            sessions[currentSessionId] = {};
-          }
-          sessions[currentSessionId].songs = songs;
+          adminSongs = songs;
           
-          // Ocultar la sección inicial de crear sesión
-          document.getElementById("create-session-section").classList.add("hidden");
+          // Ocultar COMPLETAMENTE la sección inicial de crear sesión
+          document.getElementById("create-session-section").style.display = "none";
           
           // Mostrar lista de canciones para el admin
           renderAdminSongList();
@@ -403,10 +400,8 @@
           const songListContainer = document.getElementById("song-list-container");
           songListContainer.innerHTML = "";
           
-          if (sessions[currentSessionId] && sessions[currentSessionId].songs) {
-            const songs = sessions[currentSessionId].songs;
-            
-            songs.forEach((song, index) => {
+          if (adminSongs && adminSongs.length > 0) {
+            adminSongs.forEach((song, index) => {
               const songItem = document.createElement("div");
               songItem.classList.add("admin-song-item");
               songItem.innerHTML = `
