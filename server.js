@@ -17,21 +17,23 @@ const sessions = {}
 
 io.on('connection', socket => {
   socket.on('createSession', async ({ playlistUrl }) => {
-    // Genera un sessionId único
-    const sessionId = Math.random().toString(36).substring(2, 8)
-    // Simula obtener canciones (deberías reemplazar esto por tu lógica real)
-    const allSongs = [{ title: 'Canción 1', artist: 'Artista 1' }, { title: 'Canción 2', artist: 'Artista 2' }]
-    sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
-    const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3000'}?sid=${sessionId}`
+    try {
+      const sessionId = Math.random().toString(36).substring(2, 8)
+      const allSongs = [{ title: 'Canción 1', artist: 'Artista 1' }, { title: 'Canción 2', artist: 'Artista 2' }]
+      sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
+      const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3000'}?sid=${sessionId}`
 
-    // Guarda la sesión en Firestore
-    await db.collection('sessions').doc(sessionId).set({
-      playlistUrl,
-      songs: allSongs,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    })
+      await db.collection('sessions').doc(sessionId).set({
+        playlistUrl,
+        songs: allSongs,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      })
 
-    socket.emit('sessionCreated', { sessionId, joinUrl })
+      socket.emit('sessionCreated', { sessionId, joinUrl })
+    } catch (err) {
+      console.error('Error guardando sesión en Firestore:', err)
+      socket.emit('sessionError', 'No se pudo guardar la sesión en Firebase')
+    }
   })
 
   socket.on('joinSession', async ({ sessionId, userId }) => {
