@@ -17,40 +17,52 @@
     <!-- Role selection removed -->
 
     <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
-      <p class="title">KikoBingo</p>
-      <div class="mb-6">
-        <img src="/img/kiko.png" class="img_principal" alt="KikoBingo" />
+      <!-- Header principal con logo y título -->
+      <div class="header-section">
+        <div class="logo-container">
+          <img src="/img/kiko.png" class="logo-image" alt="KikoBingo" />
+          <div class="title-container">
+            <h1 class="main-title">KikoBingo</h1>
+            <p class="subtitle">Bingo Musical Interactivo</p>
+          </div>
+        </div>
       </div>
-      <h1>Panel de Administración</h1>
-      <div id="create-session-section">
-        <label for="playlist-url" class="block text-lg mb-2"
-          >Enlace de Playlist Pública de Spotify:</label
-        >
-        <input
-          type="text"
-          id="playlist-url"
-          class="form-input mb-4"
-          placeholder="Ej: https://open.spotify.com/playlist/..."
-        />
-        <button id="create-session-btn" class="btn">
-          <i class="fas fa-play"></i> Iniciar Nueva Sesión
-        </button>
-      </div>
+      
+      <!-- Panel de administración -->
+      <div class="admin-content">
+        <h2 class="section-title">Panel de Administración</h2>
+        <div id="create-session-section">
+          <label for="playlist-url" class="input-label">
+            <i class="fab fa-spotify"></i>
+            Enlace de Playlist Pública de Spotify:
+          </label>
+          <input
+            type="text"
+            id="playlist-url"
+            class="form-input mb-4"
+            placeholder="https://open.spotify.com/playlist/..."
+          />
+          <button id="create-session-btn" class="btn btn-primary">
+            <i class="fas fa-play"></i> 
+            <span>Iniciar Nueva Sesión</span>
+          </button>
+        </div>
 
-      <div id="session-info" class="hidden mt-6">
-        <p class="text-lg font-bold mb-2">
-          ID de Sesión: <span id="session-id-display"></span>
-        </p>
-        <p class="text-lg mb-4">
-          Comparte este enlace para que los jugadores se unan:
-        </p>
-        <a
-          id="join-link"
-          href="#"
-          target="_blank"
-          class="text-blue-200 hover:underline text-lg font-medium mb-4 block overflow-hidden text-ellipsis whitespace-nowrap"
-        ></a>
-        <div id="qrcode" class="qr-code-container mx-auto"></div>
+        <div id="session-info" class="hidden mt-6">
+          <p class="text-lg font-bold mb-2">
+            ID de Sesión: <span id="session-id-display"></span>
+          </p>
+          <p class="text-lg mb-4">
+            Comparte este enlace para que los jugadores se unan:
+          </p>
+          <a
+            id="join-link"
+            href="#"
+            target="_blank"
+            class="text-blue-200 hover:underline text-lg font-medium mb-4 block overflow-hidden text-ellipsis whitespace-nowrap"
+          ></a>
+          <div id="qrcode" class="qr-code-container mx-auto"></div>
+        </div>
       </div>
     </div>
 
