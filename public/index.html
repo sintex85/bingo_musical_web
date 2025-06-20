@@ -217,32 +217,16 @@
           }
         });
 
-        socket.on(
-          "sessionJoined",
-          ({ sessionId, bingoCard, currentTrack, isPlaying }) => {
+        socket.on("sessionJoined", ({ sessionId, bingoCard }) => {
             currentSessionId = sessionId;
-            currentBingoCard = bingoCard;
-            winMessageDiv.classList.add("hidden"); // Oculta el mensaje de victoria en la nueva sesión
-
-            document
-              .getElementById("join-session-section")
-              .classList.add("hidden");
+            // Asegurarnos de que el cartón solo tenga 20 celdas
+            currentBingoCard = bingoCard.slice(0, 20);
+            document.getElementById("join-session-section").classList.add("hidden");
             gameAreaDiv.classList.remove("hidden");
-            showMessage(
-              `Te has unido a la sesión ${sessionId}. ¡Que empiece el juego!`,
-              "success"
-            );
-
-            renderBingoCard(bingoCard);
+            renderBingoCard(currentBingoCard);
             updatePlayerStats();
-            // Actualiza el estado inicial de la canción para nuevos jugadores
-            socket.emit("requestCurrentSong", { sessionId: currentSessionId });
-            socket.emit("requestPlayerState", {
-              sessionId: currentSessionId,
-              userId: userId,
+            showMessage(`Te has unido a la sesión ${sessionId}. ¡Que empiece el juego!`, "success");
             });
-          }
-        );
 
         socket.on(
           "updateBingoCard",
@@ -265,56 +249,53 @@
 
 
         function renderBingoCard(card) {
-          bingoCardDiv.innerHTML = "";
-          card.forEach((song) => {
-            const cell = document.createElement("div");
-            cell.classList.add("bingo-cell", "rounded-lg", "shadow-md");
-            cell.dataset.songId = song.id;
-            cell.innerHTML = `
-                        <p class="font-bold">${song.title}</p>
-                        <p class="text-sm">${song.artist}</p>
-                    `;
-            cell.addEventListener("click", () => {
-              // Toggle marked state
-              cell.classList.toggle("marked");
-              // Recompute and display stats
-              updatePlayerStats();
+            bingoCardDiv.innerHTML = "";
+            card.forEach(song => {
+                const cell = document.createElement("div");
+                cell.classList.add("bingo-cell");
+                cell.innerHTML = `
+                <p class="font-bold">${song.title}</p>
+                <p class="text-sm">${song.artist}</p>
+                `;
+                cell.addEventListener("click", () => {
+                cell.classList.toggle("marked");
+                updatePlayerStats();
+                });
+                bingoCardDiv.appendChild(cell);
             });
-            bingoCardDiv.appendChild(cell);
-          });
-        }
+            }
 
         function updatePlayerStats() {
-          // Obtiene todas las celdas del cartón
-          const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
-          // Cuenta marcadas
-          const totalMarked = Array.from(cells).filter(cell => cell.classList.contains("marked")).length;
-          markedCountSpan.textContent = totalMarked + " / 20";
+            const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
+            const totalCells = cells.length;       // deberían ser 20
+            const totalMarked = [...cells].filter(c => c.classList.contains("marked")).length;
+            markedCountSpan.textContent = `${totalMarked} / ${totalCells}`;
 
-          // Configuración del cartón: 4 filas x 5 columnas = 20 canciones
-          const rows = 4;
-          const cols = 5;
-          let lines = 0;
-
-          // Comprueba cada fila horizontal
-          for (let r = 0; r < rows; r++) {
-            let markedInRow = 0;
-            for (let c = 0; c < cols; c++) {
-              const idx = r * cols + c;
-              if (cells[idx].classList.contains("marked")) markedInRow++;
+            // Comprobar líneas horizontales (4 filas × 5 cols)
+            const cols = 5, rows = 4;
+            let lines = 0;
+            for (let r = 0; r < rows; r++) {
+                let markedInRow = 0;
+                for (let c = 0; c < cols; c++) {
+                if (cells[r * cols + c].classList.contains("marked")) markedInRow++;
+                }
+                if (markedInRow === cols) lines++;
             }
-            if (markedInRow === cols) lines++;
-          }
-          linesCountSpan.textContent = lines;
+            linesCountSpan.textContent = lines;
 
-          // Comprueba bingo completo
-          if (totalMarked === cells.length) {
-            winMessageDiv.classList.remove("hidden");
-            showMessage("¡BINGO! Has completado todas las canciones.", "success");
-          } else {
-            winMessageDiv.classList.add("hidden");
-          }
-        }
+            // Mensajes de línea/bingo
+            if (totalMarked === totalCells) {
+                winMessageDiv.textContent = "¡BINGO!";
+                winMessageDiv.classList.remove("hidden");
+                showMessage("¡BINGO! Has completado todas las canciones.", "success");
+            } else if (lines > 0) {
+                winMessageDiv.textContent = "¡LÍNEA!";
+                winMessageDiv.classList.remove("hidden");
+                showMessage(`¡LÍNEA! Has completado ${lines} línea${lines>1?"s":""}.`, "info");
+            } else {
+                winMessageDiv.classList.add("hidden");
+            }
+            }
       // Decide vista según presence de sid en la URL
       const initSid = new URLSearchParams(window.location.search).get("sid");
       if (initSid) {
