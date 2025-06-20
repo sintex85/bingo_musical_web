@@ -226,10 +226,6 @@ io.on('connection', (socket) => {
     socket.on('createSession', async ({ playlistUrl }) => {
         console.log('[STEP-1] createSession recibido');
         console.log(`[createSession] Role: ${userRole}, Socket: ${socket.id}, URL: ${playlistUrl}`);
-        if (userRole !== 'admin') {
-            socket.emit('sessionError', 'Solo los administradores pueden crear sesiones.');
-            return;
-        }
 
         const playlistId = getPlaylistIdFromUrl(playlistUrl);
         if (!playlistId) {
