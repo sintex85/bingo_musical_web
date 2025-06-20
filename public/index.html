@@ -261,8 +261,8 @@
           joinLink.textContent = joinUrl;
           sessionInfoDiv.classList.remove("hidden");
           
-          // Limpiar el input inicial después de crear la sesión
-          playlistUrlInput.value = '';
+          // Ocultar la sección inicial de crear sesión
+          document.getElementById("create-session-section").classList.add("hidden");
           
           showMessage(
             "Sessió creada amb èxit. Comparteix l'enllaç.",
