@@ -47,9 +47,6 @@
           class="text-blue-200 hover:underline text-lg font-medium mb-4 block overflow-hidden text-ellipsis whitespace-nowrap"
         ></a>
         <div id="qrcode" class="qr-code-container mx-auto"></div>
-
-        
-        
       </div>
     </div>
 
@@ -131,7 +128,7 @@
 
       // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
       window.addEventListener("DOMContentLoaded", () => {
-        socket.emit('setRole', { role: 'admin' });
+        socket.emit("setRole", { role: "admin" });
         // Si 'socket' no se pudo inicializar (porque 'io' no estaba definido), no continuar con la lógica que lo usa
         if (typeof socket === "undefined") {
           console.error(
@@ -154,7 +151,6 @@
         const joinLink = document.getElementById("join-link");
         const qrcodeDiv = document.getElementById("qrcode");
         const sessionInfoDiv = document.getElementById("session-info");
-        
 
         const joinSessionIdInput = document.getElementById("join-session-id");
         const joinSessionBtn = document.getElementById("join-session-btn");
@@ -203,8 +199,6 @@
           showMessage(message);
         });
 
-
-
         joinSessionBtn.addEventListener("click", () => {
           const sid = joinSessionIdInput.value.trim();
           if (sid) {
@@ -218,15 +212,20 @@
         });
 
         socket.on("sessionJoined", ({ sessionId, bingoCard }) => {
-            currentSessionId = sessionId;
-            // Asegurarnos de que el cartón solo tenga 20 celdas
-            currentBingoCard = bingoCard.slice(0, 20);
-            document.getElementById("join-session-section").classList.add("hidden");
-            gameAreaDiv.classList.remove("hidden");
-            renderBingoCard(currentBingoCard);
-            updatePlayerStats();
-            showMessage(`Te has unido a la sesión ${sessionId}. ¡Que empiece el juego!`, "success");
-            });
+          currentSessionId = sessionId;
+          // Asegurarnos de que el cartón solo tenga 20 celdas
+          currentBingoCard = bingoCard.slice(0, 20);
+          document
+            .getElementById("join-session-section")
+            .classList.add("hidden");
+          gameAreaDiv.classList.remove("hidden");
+          renderBingoCard(currentBingoCard);
+          updatePlayerStats();
+          showMessage(
+            `Te has unido a la sesión ${sessionId}. ¡Que empiece el juego!`,
+            "success"
+          );
+        });
 
         socket.on(
           "updateBingoCard",
@@ -246,65 +245,68 @@
           }
         );
 
-
-
         function renderBingoCard(card) {
-            bingoCardDiv.innerHTML = "";
-            card.forEach(song => {
-                const cell = document.createElement("div");
-                cell.classList.add("bingo-cell");
-                cell.innerHTML = `
+          bingoCardDiv.innerHTML = "";
+          card.forEach((song) => {
+            const cell = document.createElement("div");
+            cell.classList.add("bingo-cell");
+            cell.innerHTML = `
                 <p class="font-bold">${song.title}</p>
                 <p class="text-sm">${song.artist}</p>
                 `;
-                cell.addEventListener("click", () => {
-                cell.classList.toggle("marked");
-                updatePlayerStats();
-                });
-                bingoCardDiv.appendChild(cell);
+            cell.addEventListener("click", () => {
+              cell.classList.toggle("marked");
+              updatePlayerStats();
             });
-            }
+            bingoCardDiv.appendChild(cell);
+          });
+        }
 
         function updatePlayerStats() {
-            const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
-            const totalCells = cells.length;       // should be 20
-            const totalMarked = [...cells].filter(c => c.classList.contains("marked")).length;
-            markedCountSpan.textContent = `${totalMarked} / ${totalCells}`;
+          const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
+          const totalCells = cells.length; // should be 20
+          const totalMarked = [...cells].filter((c) =>
+            c.classList.contains("marked")
+          ).length;
+          markedCountSpan.textContent = `${totalMarked} / ${totalCells}`;
 
-            // LINEA once you have 5 or more marked (but less than full card)
-            const hasLine = totalMarked >= 5 && totalMarked < totalCells;
-            linesCountSpan.textContent = hasLine ? 1 : 0;
+          // only exactly 5 marks = LINEA
+          const isLine = totalMarked === 5;
+          linesCountSpan.textContent = isLine ? 1 : 0;
 
-            if (totalMarked === totalCells) {
-                // BINGO when all are marked
-                winMessageDiv.textContent = "¡BINGO!";
-                winMessageDiv.classList.remove("hidden");
-                showMessage("¡BINGO! Has completado todas las canciones.", "success");
-            } else if (hasLine) {
-                // LINEA when at least 5 marked
-                winMessageDiv.textContent = "¡LÍNEA!";
-                winMessageDiv.classList.remove("hidden");
-                showMessage(`¡LÍNEA! Has marcado ${totalMarked} canciones.`, "info");
-            } else {
-                winMessageDiv.classList.add("hidden");
-            }
+          if (totalMarked === totalCells) {
+            // BINGO when all are marked
+            winMessageDiv.textContent = "¡BINGO!";
+            winMessageDiv.classList.remove("hidden");
+            showMessage(
+              "¡BINGO! Has completado todas las canciones.",
+              "success"
+            );
+          } else if (isLine) {
+            // LINEA only at exactly 5
+            winMessageDiv.textContent = "¡LÍNEA!";
+            winMessageDiv.classList.remove("hidden");
+            showMessage("¡LÍNEA! Has marcado exactamente 5 canciones.", "info");
+          } else {
+            winMessageDiv.classList.add("hidden");
+          }
         }
-      // Decide vista según presence de sid en la URL
-      const initSid = new URLSearchParams(window.location.search).get("sid");
-      if (initSid) {
+        // Decide vista según presence de sid en la URL
+        const initSid = new URLSearchParams(window.location.search).get("sid");
+        if (initSid) {
           // Modo jugador
-          socket.emit('setRole', { role: 'player' });
-          adminPanelDiv.classList.add('hidden');
-          playerViewDiv.classList.remove('hidden');
+          socket.emit("setRole", { role: "player" });
+          adminPanelDiv.classList.add("hidden");
+          playerViewDiv.classList.remove("hidden");
           // Generar un ID de jugador e unirse automáticamente
-          userId = 'player_' + Math.random().toString(36).substring(2, 9);
-          socket.emit('joinSession', { sessionId: initSid, userId });
-      } else {
+          userId = "player_" + Math.random().toString(36).substring(2, 9);
+          socket.emit("joinSession", { sessionId: initSid, userId });
+        } else {
           // Modo administrador
-          socket.emit('setRole', { role: 'admin' });
-          adminPanelDiv.classList.remove('hidden');
-          playerViewDiv.classList.add('hidden');
-      }
+          socket.emit("setRole", { role: "admin" });
+          adminPanelDiv.classList.remove("hidden");
+          playerViewDiv.classList.add("hidden");
+        }
       }); // Fin del listener de DOMContentLoaded
     </script>
   </body>
