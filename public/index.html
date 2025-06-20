@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="val">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,8 +14,6 @@
   <body class="flex flex-col justify-center items-center min-h-screen p-4">
     <div id="message-box" class="rounded-lg shadow-lg"></div>
 
-    <!-- Role selection removed -->
-
     <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
       <!-- Header principal con logo y título -->
       <div class="header-section">
@@ -23,37 +21,37 @@
           <img src="/img/kiko.png" class="logo-image" alt="KikoBingo" />
           <div class="title-container">
             <h1 class="main-title">KikoBingo</h1>
-            <p class="subtitle">Bingo Musical Interactivo</p>
+            <p class="subtitle">Bingo Musical Interactiu</p>
           </div>
         </div>
       </div>
       
       <!-- Panel de administración -->
       <div class="admin-content">
-        <h2 class="section-title">Panel de Administración</h2>
+        <h2 class="section-title">Panell d'Administració</h2>
         <div id="create-session-section">
           <label for="playlist-url" class="input-label">
             <i class="fab fa-spotify"></i>
-            Enlace de Playlist Pública de Spotify:
+            Enllaç de Playlist Pública de Spotify:
           </label>
           <input
             type="text"
             id="playlist-url"
             class="form-input mb-4"
-            placeholder="https://open.spotify.com/playlist/..."
+            placeholder="Ex: https://open.spotify.com/playlist/..."
           />
           <button id="create-session-btn" class="btn btn-primary">
             <i class="fas fa-play"></i> 
-            <span>Iniciar Nueva Sesión</span>
+            <span>Iniciar Nova Sessió</span>
           </button>
         </div>
 
         <div id="session-info" class="hidden mt-6">
           <p class="text-lg font-bold mb-2">
-            ID de Sesión: <span id="session-id-display"></span>
+            ID de Sessió: <span id="session-id-display"></span>
           </p>
           <p class="text-lg mb-4">
-            Comparte este enlace para que los jugadores se unan:
+            Comparteix aquest enllaç perquè els jugadors s'unisquen:
           </p>
           <a
             id="join-link"
@@ -67,19 +65,19 @@
     </div>
 
     <div id="player-view" class="container w-full max-w-3xl mx-auto hidden">
-      <h1>Tu Cartón de Bingo</h1>
+      <h1>El Teu Cartó de Bingo</h1>
       <div id="join-session-section">
         <label for="join-session-id" class="block text-lg mb-2"
-          >Introduce ID de Sesión:</label
+          >Introdueix l'ID de Sessió:</label
         >
         <input
           type="text"
           id="join-session-id"
           class="form-input mb-4"
-          placeholder="ID de sesión"
+          placeholder="ID de sessió"
         />
         <button id="join-session-btn" class="btn btn-green">
-          <i class="fas fa-sign-in-alt"></i> Unirse a Sesión
+          <i class="fas fa-sign-in-alt"></i> Unir-se a la Sessió
         </button>
       </div>
 
@@ -88,8 +86,8 @@
           <!-- Celdas del cartón de bingo se insertarán aquí -->
         </div>
         <div class="game-status mt-4">
-          <p>Canciones Marcadas: <span id="marked-count">0</span> / 20</p>
-          <p>Líneas Completadas: <span id="lines-count">0</span></p>
+          <p>Cançons Marcades: <span id="marked-count">0</span> / 20</p>
+          <p>Línies Completades: <span id="lines-count">0</span></p>
         </div>
         <div
           id="win-message"
@@ -110,13 +108,13 @@
       function showMessage(message, type = "error") {
         const msgBox = document.getElementById("message-box");
         msgBox.textContent = message;
-        msgBox.className = "rounded-lg shadow-lg show"; // Restablece clases y añade 'show'
+        msgBox.className = "rounded-lg shadow-lg show";
         if (type === "success") {
-          msgBox.style.backgroundColor = "rgba(76, 175, 80, 0.95)"; // Verde para éxito
+          msgBox.style.backgroundColor = "rgba(76, 175, 80, 0.95)";
         } else if (type === "info") {
-          msgBox.style.backgroundColor = "rgba(33, 150, 243, 0.95)"; // Azul para información
+          msgBox.style.backgroundColor = "rgba(33, 150, 243, 0.95)";
         } else {
-          msgBox.style.backgroundColor = "rgba(230, 57, 70, 0.95)"; // Rojo para error
+          msgBox.style.backgroundColor = "rgba(230, 57, 70, 0.95)";
         }
 
         setTimeout(() => {
@@ -124,22 +122,17 @@
         }, 3000);
       }
 
-      let socket; // Declara la variable socket globalmente para este script
+      let socket;
 
-      // Este bloque se ejecuta tan pronto como este script se parsea,
-      // después de que socket.io.js ha sido cargado.
       if (typeof io === "undefined") {
         showMessage(
-          "Error crítico: El cliente de Socket.IO no se ha cargado correctamente. Por favor, revisa la conexión de red y la configuración del servidor.",
+          "Error crític: El client de Socket.IO no s'ha carregat correctament. Per favor, revisa la connexió de xarxa i la configuració del servidor.",
           "error"
         );
         console.error(
-          "El objeto 'io' de Socket.IO es indefinido. No se puede continuar con la funcionalidad de Socket.IO."
+          "L'objecte 'io' de Socket.IO és indefinit. No es pot continuar amb la funcionalitat de Socket.IO."
         );
-        // No se inicializa 'socket' y el resto de la lógica dependiente de 'socket'
-        // en DOMContentLoaded deberá manejar 'socket' como indefinido.
       } else {
-        // Conectar al puerto correcto según el entorno
         const socketUrl = window.location.hostname === 'localhost' ? 
           'http://localhost:3001' : 
           window.location.origin;
@@ -150,15 +143,12 @@
         });
       }
 
-      // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
       window.addEventListener("DOMContentLoaded", () => {
         socket.emit("setRole", { role: "admin" });
-        // Si 'socket' no se pudo inicializar (porque 'io' no estaba definido), no continuar con la lógica que lo usa
         if (typeof socket === "undefined") {
           console.error(
-            "Socket no se inicializó correctamente en DOMContentLoaded. Abortando lógica dependiente del DOM."
+            "Socket no s'ha inicialitzat correctament en DOMContentLoaded. Avortant lògica dependent del DOM."
           );
-          // Retorna para evitar errores en cascada.
           return;
         }
 
@@ -190,10 +180,10 @@
         createSessionBtn.addEventListener("click", () => {
           const playlistUrl = playlistUrlInput.value.trim();
           if (playlistUrl) {
-            showMessage("Creando sesión y obteniendo playlist...", "info");
+            showMessage("Creant sessió i obtenint playlist...", "info");
             socket.emit("createSession", { playlistUrl });
           } else {
-            showMessage("Por favor, introduce una URL de playlist válida.");
+            showMessage("Per favor, introdueix una URL de playlist vàlida.");
           }
         });
 
@@ -204,7 +194,7 @@
           joinLink.textContent = joinUrl;
           sessionInfoDiv.classList.remove("hidden");
           showMessage(
-            "Sesión creada con éxito. Comparte el enlace.",
+            "Sessió creada amb èxit. Comparteix l'enllaç.",
             "success"
           );
 
@@ -228,10 +218,10 @@
           if (sid) {
             // Generar un ID de usuario único para este jugador
             userId = "player_" + Math.random().toString(36).substring(2, 9);
-            showMessage(`Uniéndote a la sesión ${sid}...`, "info");
+            showMessage(`Unint-se a la sessió ${sid}...`, "info");
             socket.emit("joinSession", { sessionId: sid, userId: userId });
           } else {
-            showMessage("Por favor, introduce un ID de sesión.");
+            showMessage("Per favor, introdueix un ID de sessió.");
           }
         });
 
@@ -246,7 +236,7 @@
           renderBingoCard(currentBingoCard);
           updatePlayerStats();
           showMessage(
-            `Te has unido a la sesión ${sessionId}. ¡Que empiece el juego!`,
+            `T'has unit a la sessió ${sessionId}. Que comence el joc!`,
             "success"
           );
         });
@@ -288,33 +278,31 @@
 
         function updatePlayerStats() {
           const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
-          const totalCells = cells.length; // should be 20
+          const totalCells = cells.length;
           const totalMarked = [...cells].filter((c) =>
             c.classList.contains("marked")
           ).length;
           markedCountSpan.textContent = `${totalMarked} / ${totalCells}`;
 
-          // only exactly 5 marks = LINEA
           const isLine = totalMarked === 5;
           linesCountSpan.textContent = isLine ? 1 : 0;
 
           if (totalMarked === totalCells) {
-            // BINGO when all are marked
             winMessageDiv.textContent = "¡BINGO!";
             winMessageDiv.classList.remove("hidden");
             showMessage(
-              "¡BINGO! Has completado todas las canciones.",
+              "¡BINGO! Has completat totes les cançons.",
               "success"
             );
           } else if (isLine) {
-            // LINEA only at exactly 5
             winMessageDiv.textContent = "¡LÍNEA!";
             winMessageDiv.classList.remove("hidden");
-            showMessage("¡LÍNEA! Has marcado exactamente 5 canciones.", "info");
+            showMessage("¡LÍNEA! Has marcat exactament 5 cançons.", "info");
           } else {
             winMessageDiv.classList.add("hidden");
           }
         }
+
         // Decide vista según presence de sid en la URL
         const initSid = new URLSearchParams(window.location.search).get("sid");
         if (initSid) {

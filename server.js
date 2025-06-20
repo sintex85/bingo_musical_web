@@ -36,32 +36,31 @@ const sessions = {}
 // Función para obtener canciones de una playlist de Spotify
 async function getSpotifyPlaylistSongs(playlistUrl) {
   try {
-    console.log('🎵 === SPOTIFY DEBUG ===')
+    console.log('🎵 === DEBUG SPOTIFY ===')
     console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID)
-    console.log('Client Secret existe:', !!process.env.SPOTIFY_CLIENT_SECRET)
-    console.log('URL recibida:', playlistUrl)
+    console.log('Client Secret existeix:', !!process.env.SPOTIFY_CLIENT_SECRET)
+    console.log('URL rebuda:', playlistUrl)
     
     // Extraer el ID de la playlist de la URL
     const playlistId = playlistUrl.split('/playlist/')[1]?.split('?')[0]
-    console.log('Playlist ID extraído:', playlistId)
+    console.log('Playlist ID extret:', playlistId)
     
     if (!playlistId) {
-      throw new Error('URL de playlist inválida')
+      throw new Error('URL de playlist invàlida')
     }
 
     // Obtener token de acceso
-    console.log('Obteniendo token de Spotify...')
+    console.log('Obtenint token de Spotify...')
     const data = await spotifyApi.clientCredentialsGrant()
     
-    // IMPORTANTE: aplicar el token antes de hacer cualquier llamada
     spotifyApi.setAccessToken(data.body.access_token)
-    console.log('✅ Token aplicado correctamente:', data.body.access_token.substring(0, 20) + '...')
+    console.log('✅ Token aplicat correctament:', data.body.access_token.substring(0, 20) + '...')
 
     // Obtener las canciones de la playlist
-    console.log('Obteniendo playlist...')
+    console.log('Obtenint playlist...')
     const playlist = await spotifyApi.getPlaylist(playlistId)
     const tracks = playlist.body.tracks.items
-    console.log(`✅ Se obtuvieron ${tracks.length} tracks de Spotify`)
+    console.log(`✅ S'han obtingut ${tracks.length} tracks de Spotify`)
 
     const songs = tracks.map(item => ({
       title: item.track.name,
@@ -69,46 +68,44 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
       id: item.track.id
     }))
     
-    console.log('Primeras 3 canciones:', songs.slice(0, 3))
+    console.log('Primeres 3 cançons:', songs.slice(0, 3))
     return songs
   } catch (error) {
-    console.error('❌ Error obteniendo playlist de Spotify:', error.message)
+    console.error('❌ Error obtenint playlist de Spotify:', error.message)
     console.error('❌ Error stack:', error.stack)
-    console.error('Usando canciones de ejemplo...')
+    console.error('Usant cançons d\'exemple...')
     // Fallback a canciones de ejemplo
     return [
-      { title: 'Canción 1', artist: 'Artista 1' },
-      { title: 'Canción 2', artist: 'Artista 2' },
-      { title: 'Canción 3', artist: 'Artista 3' },
-      { title: 'Canción 4', artist: 'Artista 4' },
-      { title: 'Canción 5', artist: 'Artista 5' }
+      { title: 'Cançó 1', artist: 'Artista 1' },
+      { title: 'Cançó 2', artist: 'Artista 2' },
+      { title: 'Cançó 3', artist: 'Artista 3' },
+      { title: 'Cançó 4', artist: 'Artista 4' },
+      { title: 'Cançó 5', artist: 'Artista 5' }
     ]
   }
 }
 
 io.on('connection', socket => {
-  console.log('Usuario conectado:', socket.id)
+  console.log('Usuari connectat:', socket.id)
 
   socket.on('createSession', async ({ playlistUrl }) => {
     try {
-      console.log('=== INICIANDO CREACIÓN DE SESIÓN ===')
-      console.log('Creando sesión con URL:', playlistUrl)
+      console.log('=== INICIANT CREACIÓ DE SESSIÓ ===')
+      console.log('Creant sessió amb URL:', playlistUrl)
       
       const sessionId = Math.random().toString(36).substring(2, 8)
-      console.log('SessionId generado:', sessionId)
+      console.log('SessionId generat:', sessionId)
       
-      // Obtener canciones reales de Spotify
-      console.log('Obteniendo canciones de Spotify...')
+      console.log('Obtenint cançons de Spotify...')
       const allSongs = await getSpotifyPlaylistSongs(playlistUrl)
-      console.log(`Se obtuvieron ${allSongs.length} canciones`)
+      console.log(`S'han obtingut ${allSongs.length} cançons`)
       
       sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
       
-      // URL con dominio correcto
       const joinUrl = `https://kikobingo.com?sid=${sessionId}`
-      console.log('JoinUrl generado:', joinUrl)
+      console.log('JoinUrl generat:', joinUrl)
 
-      console.log('=== INTENTANDO GUARDAR EN FIRESTORE ===')
+      console.log('=== INTENTANT GUARDAR EN FIRESTORE ===')
       const sessionData = {
         playlistUrl,
         songs: allSongs,
@@ -116,26 +113,26 @@ io.on('connection', socket => {
       }
       
       await db.collection('sessions').doc(sessionId).set(sessionData)
-      console.log('=== FIRESTORE: GUARDADO EXITOSO ===')
+      console.log('=== FIRESTORE: GUARDAT EXITÓS ===')
 
       socket.emit('sessionCreated', { sessionId, joinUrl })
     } catch (err) {
-      console.error('=== ERROR COMPLETO ===', err)
-      socket.emit('sessionError', 'No se pudo crear la sesión: ' + err.message)
+      console.error('=== ERROR COMPLET ===', err)
+      socket.emit('sessionError', 'No s\'ha pogut crear la sessió: ' + err.message)
     }
   })
 
   socket.on('joinSession', async ({ sessionId, userId }) => {
     try {
       if (!sessions[sessionId]) {
-        return socket.emit('sessionError', 'Sesión no encontrada')
+        return socket.emit('sessionError', 'Sessió no trobada')
       }
       
-      console.log(`Usuario ${userId} uniéndose a sesión ${sessionId}`)
+      console.log(`Usuari ${userId} unint-se a sessió ${sessionId}`)
       const bingoCard = sessions[sessionId].songs.slice(0, 20)
       sessions[sessionId].players[userId] = { bingoCard }
 
-      console.log('Guardando jugador en Firestore...')
+      console.log('Guardant jugador en Firestore...')
       await db
         .collection('sessions').doc(sessionId)
         .collection('players').doc(userId)
@@ -146,13 +143,13 @@ io.on('connection', socket => {
           isBingo: false,
           joinedAt: admin.firestore.FieldValue.serverTimestamp()
         })
-      console.log('Jugador guardado exitosamente en Firestore')
+      console.log('Jugador guardat exitosament en Firestore')
 
       socket.emit('sessionJoined', { sessionId, bingoCard })
       socket.join(sessionId)
     } catch (err) {
-      console.error('Error guardando jugador en Firestore:', err)
-      socket.emit('sessionError', 'Error al unirse a la sesión')
+      console.error('Error guardant jugador en Firestore:', err)
+      socket.emit('sessionError', 'Error al unir-se a la sessió')
     }
   })
 })
@@ -160,20 +157,19 @@ io.on('connection', socket => {
 // Función de prueba para verificar conexión
 async function testFirestoreConnection() {
   try {
-    console.log('=== PROBANDO CONEXIÓN A FIRESTORE ===')
+    console.log('=== PROVANT CONNEXIÓ A FIRESTORE ===')
     const testDoc = await db.collection('test').doc('connection').set({
-      message: 'Conexión exitosa',
+      message: 'Connexió exitosa',
       timestamp: admin.firestore.FieldValue.serverTimestamp()
     })
-    console.log('✅ Firestore conectado correctamente')
+    console.log('✅ Firestore connectat correctament')
     
-    // Leer el documento para confirmar
     const doc = await db.collection('test').doc('connection').get()
     if (doc.exists) {
       console.log('✅ Lectura confirmada:', doc.data())
     }
   } catch (error) {
-    console.error('❌ Error conectando a Firestore:', error)
+    console.error('❌ Error connectant a Firestore:', error)
   }
 }
 
