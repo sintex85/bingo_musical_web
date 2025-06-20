@@ -1,16 +1,30 @@
+const express = require('express')
+const http = require('http')
+const { Server } = require('socket.io')
 const admin = require('firebase-admin')
 const serviceAccount = require('./serviceAccountKey.json')
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 })
 const db = admin.firestore()
 
+const app = express()
+const server = http.createServer(app)
+const io = new Server(server)
+
+const sessions = {}
+
 io.on('connection', socket => {
   socket.on('createSession', async ({ playlistUrl }) => {
-    // …tu lógica para generar sessionId y allSongs…
-    sessions[sessionId] = { /* … */ }
+    // Genera un sessionId único
+    const sessionId = Math.random().toString(36).substring(2, 8)
+    // Simula obtener canciones (deberías reemplazar esto por tu lógica real)
+    const allSongs = [{ title: 'Canción 1', artist: 'Artista 1' }, { title: 'Canción 2', artist: 'Artista 2' }]
+    sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
+    const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3000'}?sid=${sessionId}`
 
-    // ← Aquí persistes la sesión en Firestore:
+    // Guarda la sesión en Firestore
     await db.collection('sessions').doc(sessionId).set({
       playlistUrl,
       songs: allSongs,
@@ -21,11 +35,12 @@ io.on('connection', socket => {
   })
 
   socket.on('joinSession', async ({ sessionId, userId }) => {
-    // …tu lógica de join…
-    const bingoCard = /* … */
-    sessions[sessionId].players[userId] = { bingoCard, /* … */ }
+    if (!sessions[sessionId]) return socket.emit('sessionError', 'Sesión no encontrada')
+    // Simula un cartón de bingo (deberías reemplazar esto por tu lógica real)
+    const bingoCard = sessions[sessionId].songs.slice(0, 20)
+    sessions[sessionId].players[userId] = { bingoCard }
 
-    // ← Y aquí persistes al jugador:
+    // Guarda el jugador en Firestore
     await db
       .collection('sessions').doc(sessionId)
       .collection('players').doc(userId)
@@ -40,6 +55,10 @@ io.on('connection', socket => {
     socket.emit('sessionJoined', { sessionId, bingoCard })
     socket.join(sessionId)
   })
+})
+
+server.listen(3000, () => {
+  console.log('Servidor escuchando en puerto 3000')
 })
 
 function updatePlayerStats() {
