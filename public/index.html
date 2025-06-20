@@ -217,8 +217,10 @@
         }
 
         let currentSessionId = null;
-        let userId = null; // Generado en el lado del cliente para cada jugador que se une a una sesión
-        let currentBingoCard = []; // Almacena el cartón de bingo del jugador
+        let userId = null;
+        let currentBingoCard = [];
+        // Variable global para almacenar las canciones del admin
+        let adminSongs = [];
 
         const adminPanelDiv = document.getElementById("admin-panel");
         const playerViewDiv = document.getElementById("player-view");
@@ -260,6 +262,7 @@
           
           // Guardar las canciones para el admin
           adminSongs = songs;
+          console.log('Canciones recibidas:', adminSongs); // Debug
           
           // Ocultar COMPLETAMENTE la sección inicial de crear sesión
           document.getElementById("create-session-section").style.display = "none";
@@ -397,10 +400,18 @@
 
         // Función para renderizar la lista de canciones del admin
         function renderAdminSongList() {
+          console.log('Renderizando lista de canciones...'); // Debug
           const songListContainer = document.getElementById("song-list-container");
+          
+          if (!songListContainer) {
+            console.error('No se encontró el contenedor de canciones');
+            return;
+          }
+          
           songListContainer.innerHTML = "";
           
           if (adminSongs && adminSongs.length > 0) {
+            console.log(`Renderizando ${adminSongs.length} canciones`); // Debug
             adminSongs.forEach((song, index) => {
               const songItem = document.createElement("div");
               songItem.classList.add("admin-song-item");
@@ -421,6 +432,8 @@
               
               songListContainer.appendChild(songItem);
             });
+          } else {
+            console.log('No hay canciones para mostrar'); // Debug
           }
         }
 
@@ -431,17 +444,21 @@
           socket.emit("setRole", { role: "player" });
           adminPanelDiv.classList.add("hidden");
           playerViewDiv.classList.remove("hidden");
-          // Verificar orientación después de mostrar vista de jugador
           setTimeout(checkOrientation, 100);
-          // Generar un ID de jugador e unirse automáticamente
           userId = "player_" + Math.random().toString(36).substring(2, 9);
           socket.emit("joinSession", { sessionId: initSid, userId });
         } else {
-          // Modo administrador
+          // Modo administrador - OCULTAR COMPLETAMENTE la sección de unirse
           socket.emit("setRole", { role: "admin" });
           adminPanelDiv.classList.remove("hidden");
           playerViewDiv.classList.add("hidden");
-          // Asegurar que no se muestre el aviso en modo admin
+          
+          // Asegurar que NUNCA se vea la sección de unirse en admin
+          const joinSessionSection = document.getElementById("join-session-section");
+          if (joinSessionSection) {
+            joinSessionSection.style.display = "none";
+          }
+          
           setTimeout(checkOrientation, 100);
         }
       }); // Fin del listener de DOMContentLoaded

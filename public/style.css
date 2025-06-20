@@ -1093,3 +1093,8 @@ body.orientation-blocked #orientation-warning {
         max-width: 300px;
     }
 }
+
+/* FORZAR que la sección de unirse NUNCA aparezca en el admin */
+#admin-panel #join-session-section {
+    display: none !important;
+}
