@@ -162,18 +162,6 @@
 
       // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
       window.addEventListener("DOMContentLoaded", () => {
-        const initSid = new URLSearchParams(window.location.search).get("sid");
-        if (initSid) {
-          // Marcar rol como jugador
-          socket.emit("setRole", { role: "player" });
-          // Ocultar selector de rol y mostrar vista de jugador
-          document.getElementById("role-selection").classList.add("hidden");
-          document.getElementById("player-view").classList.remove("hidden");
-          // Poner el SID y hacer clic en “Unirse”
-          document.getElementById("join-session-id").value = initSid;
-          document.getElementById("join-session-btn").click();
-          return; // Salir para no ejecutar el resto del setup
-        }
         // Si 'socket' no se pudo inicializar (porque 'io' no estaba definido), no continuar con la lógica que lo usa
         if (typeof socket === "undefined") {
           console.error(
@@ -526,6 +514,16 @@
 
           linesCountSpan.textContent = lines;
         }
+      // Auto‑unirse si la URL contiene sid
+      const initSid = new URLSearchParams(window.location.search).get("sid");
+      if (initSid) {
+          socket.emit('setRole', { role: 'player' });
+          roleSelectionDiv.classList.add('hidden');
+          playerViewDiv.classList.remove('hidden');
+          // Generar un ID de jugador
+          userId = 'player_' + Math.random().toString(36).substring(2, 9);
+          socket.emit('joinSession', { sessionId: initSid, userId });
+      }
       }); // Fin del listener de DOMContentLoaded
     </script>
   </body>
