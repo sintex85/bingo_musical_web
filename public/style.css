@@ -90,6 +90,8 @@
             border-radius: 1rem;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
             border: 3px solid #1d3557;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .bingo-cell {
             background-color: #a8dadc;
@@ -197,5 +199,18 @@
             }
             .bingo-cell.marked::after {
                 font-size: 2rem;
+            }
+        }
+
+        /* Better mobile layout for smaller screens */
+        @media (max-width: 600px) {
+            .bingo-card {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .bingo-card {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
