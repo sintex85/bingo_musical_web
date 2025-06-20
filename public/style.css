@@ -596,39 +596,21 @@ label {
     text-transform: uppercase;
 }
 
-/* Nueva sección para crear otra sesión - fuera del cuadro del QR */
+/* Nueva sección para crear otra sesión - solo botón */
 #new-session-section {
     background: var(--surface-color);
-    padding: 24px;
+    padding: 20px;
     border-radius: 12px;
     margin-top: 32px;
     border: 1px solid var(--surface-light);
     box-shadow: 0 8px 32px rgba(15, 23, 42, 0.4);
-}
-
-#new-session-section h3 {
-    color: var(--text-primary);
-    font-size: 20px;
-    font-weight: 600;
     text-align: center;
-    margin-bottom: 24px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-#new-session-section .input-label {
-    margin-bottom: 16px;
-}
-
-#new-session-section .form-input {
-    margin-bottom: 16px;
 }
 
 #new-session-section .btn {
     width: 100%;
-    margin: 16px auto;
+    max-width: 300px;
+    margin: 0 auto;
     display: inline-flex;
 }
 
