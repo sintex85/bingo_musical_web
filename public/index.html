@@ -291,61 +291,33 @@
         }
 
         function updatePlayerStats() {
+          // Actualiza el contador de canciones marcadas
           markedCountSpan.textContent = markedSongs.size;
 
-          // Calcula líneas (solo comprobación horizontal por ahora)
+          // Configuración del cartón: 4 filas x 5 columnas = 20 canciones
+          const rows = 4;
+          const cols = 5;
           let lines = 0;
-          const size = 5; // Cartón de bingo 5x5
-          const cardArray = Array.from(currentBingoCard); // Convierte Set a Array si es necesario
 
-          // Ayuda para comprobar si un conjunto de índices están todos marcados
-          const areAllMarked = (indices) => {
-            return indices.every((index) =>
-              markedSongs.has(cardArray[index].id)
-            );
-          };
-
-          // Comprobar líneas horizontales
-          for (let i = 0; i < size; i++) {
-            const rowIndices = Array.from(
-              { length: size },
-              (_, j) => i * size + j
-            );
-            if (areAllMarked(rowIndices)) {
-              lines++;
+          // Comprueba cada fila horizontal
+          for (let r = 0; r < rows; r++) {
+            let count = 0;
+            for (let c = 0; c < cols; c++) {
+              const idx = r * cols + c;
+              const songId = currentBingoCard[idx].id;
+              if (markedSongs.has(songId)) count++;
             }
+            if (count === cols) lines++;
           }
-
-          // Comprobar líneas verticales
-          for (let j = 0; j < size; j++) {
-            const colIndices = Array.from(
-              { length: size },
-              (_, i) => i * size + j
-            );
-            if (areAllMarked(colIndices)) {
-              lines++;
-            }
-          }
-
-          // Comprobar diagonal 1 (arriba-izquierda a abajo-derecha)
-          const diag1Indices = Array.from(
-            { length: size },
-            (_, i) => i * size + i
-          );
-          if (areAllMarked(diag1Indices)) {
-            lines++;
-          }
-
-          // Comprobar diagonal 2 (arriba-derecha a abajo-izquierda)
-          const diag2Indices = Array.from(
-            { length: size },
-            (_, i) => i * size + (size - 1 - i)
-          );
-          if (areAllMarked(diag2Indices)) {
-            lines++;
-          }
-
           linesCountSpan.textContent = lines;
+
+          // Comprueba bingo completo (todas las canciones marcadas)
+          if (markedSongs.size === currentBingoCard.length) {
+            winMessageDiv.classList.remove('hidden');
+            showMessage('¡BINGO! Has completado todas las canciones.', 'success');
+          } else {
+            winMessageDiv.classList.add('hidden');
+          }
         }
       // Decide vista según presence de sid en la URL
       const initSid = new URLSearchParams(window.location.search).get("sid");
