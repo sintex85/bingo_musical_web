@@ -151,6 +151,17 @@ h1 {
     color: var(--background-dark);
 }
 
+.btn-whatsapp {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: var(--text-primary);
+    box-shadow: 0 4px 14px 0 rgba(37, 211, 102, 0.4);
+}
+
+.btn-whatsapp:hover {
+    background: linear-gradient(135deg, #128c7e 0%, #25d366 100%);
+    box-shadow: 0 8px 25px 0 rgba(37, 211, 102, 0.6);
+}
+
 /* Header y título principal mejorados */
 .header-section {
     text-align: center;
@@ -897,4 +908,30 @@ body.orientation-blocked .container {
 
 body.orientation-blocked #orientation-warning {
     display: flex !important;
+}
+
+/* Ocultar sección de unirse cuando está el juego activo */
+#game-area:not(.hidden) ~ #join-session-section {
+    display: none !important;
+}
+
+/* Asegurar que la sección de unirse esté oculta cuando hay cartón */
+.player-view-playing #join-session-section {
+    display: none !important;
+}
+
+/* Reglas adicionales para ocultar input de sesión en móvil cuando hay juego */
+@media (max-width: 768px) {
+    /* Cuando el área de juego está visible, ocultar la sección de unirse */
+    #player-view:not(.hidden) #game-area:not(.hidden) + * #join-session-section,
+    #player-view:not(.hidden) #join-session-section.hidden {
+        display: none !important;
+    }
+    
+    /* Botón de WhatsApp responsive */
+    .btn-whatsapp {
+        width: 100%;
+        margin: 16px auto;
+        max-width: 300px;
+    }
 }

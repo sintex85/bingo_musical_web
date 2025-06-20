@@ -67,6 +67,13 @@
             target="_blank"
             class="text-blue-200 hover:underline text-lg font-medium mb-4 block overflow-hidden text-ellipsis whitespace-nowrap"
           ></a>
+          
+          <!-- Botón de WhatsApp -->
+          <button id="whatsapp-share-btn" class="btn btn-whatsapp mb-4">
+            <i class="fab fa-whatsapp"></i>
+            <span>Enviar per WhatsApp</span>
+          </button>
+          
           <div id="qrcode" class="qr-code-container mx-auto"></div>
         </div>
       </div>
@@ -239,6 +246,15 @@
             "success"
           );
 
+          // Configurar botón de WhatsApp
+          const whatsappBtn = document.getElementById("whatsapp-share-btn");
+          const whatsappMessage = `Uneix-te al nostre bingo musical! ${joinUrl}`;
+          const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`;
+          
+          whatsappBtn.addEventListener("click", () => {
+            window.open(whatsappUrl, '_blank');
+          });
+
           // Generar código QR
           new QRCode(qrcodeDiv, {
             text: joinUrl,
@@ -270,10 +286,13 @@
           currentSessionId = sessionId;
           // Asegurarnos de que el cartón solo tenga 20 celdas
           currentBingoCard = bingoCard.slice(0, 20);
+          
+          // Ocultar completamente la sección de unirse cuando aparece el juego
           document
             .getElementById("join-session-section")
             .classList.add("hidden");
           gameAreaDiv.classList.remove("hidden");
+          
           renderBingoCard(currentBingoCard);
           updatePlayerStats();
           showMessage(
