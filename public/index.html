@@ -151,6 +151,7 @@
 
       // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
       window.addEventListener("DOMContentLoaded", () => {
+        socket.emit('setRole', { role: 'admin' });
         // Si 'socket' no se pudo inicializar (porque 'io' no estaba definido), no continuar con la lógica que lo usa
         if (typeof socket === "undefined") {
           console.error(
