@@ -1,3 +1,5 @@
+require('dotenv').config() // Añadir esta línea al principio
+
 const express = require('express')
 const http = require('http')
 const { Server } = require('socket.io')
@@ -14,10 +16,10 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server)
 
-// Configurar Spotify API
+// Configurar Spotify API con variables de entorno
 const spotifyApi = new SpotifyWebApi({
-  clientId: process.env.SPOTIFY_CLIENT_ID || 'tu_client_id',
-  clientSecret: process.env.SPOTIFY_CLIENT_SECRET || 'tu_client_secret'
+  clientId: process.env.SPOTIFY_CLIENT_ID,
+  clientSecret: process.env.SPOTIFY_CLIENT_SECRET
 })
 
 // Servir archivos estáticos
