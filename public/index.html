@@ -27,51 +27,6 @@
       </div>
     </div>
 
-    <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
-      <h1>Panel de Administración</h1>
-      <div id="create-session-section">
-        <label for="playlist-url" class="block text-lg mb-2"
-          >Enlace de Playlist Pública de Spotify:</label
-        >
-        <input
-          type="text"
-          id="playlist-url"
-          class="form-input mb-4"
-          placeholder="Ej: https://open.spotify.com/playlist/..."
-        />
-        <button id="create-session-btn" class="btn">
-          <i class="fas fa-play"></i> Iniciar Nueva Sesión
-        </button>
-      </div>
-
-      <div id="session-info" class="hidden mt-6">
-        <p class="text-lg font-bold mb-2">
-          ID de Sesión: <span id="session-id-display"></span>
-        </p>
-        <p class="text-lg mb-4">
-          Comparte este enlace para que los jugadores se unan:
-        </p>
-        <a
-          id="join-link"
-          href="#"
-          target="_blank"
-          class="text-blue-200 hover:underline text-lg font-medium mb-4 block overflow-hidden text-ellipsis whitespace-nowrap"
-        ></a>
-        <div id="qrcode" class="qr-code-container mx-auto"></div>
-
-        <div class="game-status mt-6">
-          <p>Canción Actual: <span id="current-song-info">Ninguna</span></p>
-        </div>
-        <audio id="audio-player" class="w-full mt-4 rounded-lg hidden"></audio>
-        <div
-          id="winner-display"
-          class="mt-4 text-xl font-bold text-yellow-300"
-        ></div>
-        <p class="mt-4 text-sm text-gray-300">
-          Nota: El audio solo se reproduce en el navegador del administrador.
-        </p>
-      </div>
-    </div>
 
     <div id="player-view" class="container w-full max-w-3xl mx-auto hidden">
       <h1>Tu Cartón de Bingo</h1>
@@ -166,24 +121,13 @@
         let markedSongs = new Set(); // Almacena los IDs de las canciones marcadas por el jugador actual
 
         const roleSelectionDiv = document.getElementById("role-selection");
-        const adminPanelDiv = document.getElementById("admin-panel");
+        // const adminPanelDiv = document.getElementById("admin-panel");
         const playerViewDiv = document.getElementById("player-view");
 
         const adminBtn = document.getElementById("admin-btn");
         const playerBtn = document.getElementById("player-btn");
 
-        const createSessionBtn = document.getElementById("create-session-btn");
-        const playlistUrlInput = document.getElementById("playlist-url");
-        const sessionIdDisplay = document.getElementById("session-id-display");
-        const joinLink = document.getElementById("join-link");
-        const qrcodeDiv = document.getElementById("qrcode");
-        const sessionInfoDiv = document.getElementById("session-info");
-        const audioPlayer = document.getElementById("audio-player");
-        const playPauseBtn = document.getElementById("play-pause-btn");
-        const nextSongBtn = document.getElementById("next-song-btn");
-        const currentSongInfo = document.getElementById("current-song-info");
-        const checkWinnersBtn = document.getElementById("check-winners-btn");
-        const winnerDisplay = document.getElementById("winner-display");
+        // Admin panel elements removed
 
         const joinSessionIdInput = document.getElementById("join-session-id");
         const joinSessionBtn = document.getElementById("join-session-btn");
@@ -196,7 +140,7 @@
         // --- Lógica de Selección de Rol ---
         adminBtn.addEventListener("click", () => {
           roleSelectionDiv.classList.add("hidden");
-          adminPanelDiv.classList.remove("hidden");
+          // adminPanelDiv.classList.remove("hidden");
           // Informa al servidor que este socket es un admin
           socket.emit("setRole", { role: "admin" });
         });
@@ -216,57 +160,7 @@
         });
 
         // --- Lógica de Admin ---
-        createSessionBtn.addEventListener("click", () => {
-          const playlistUrl = playlistUrlInput.value.trim();
-          if (playlistUrl) {
-            showMessage("Creando sesión y obteniendo playlist...", "info");
-            socket.emit("createSession", { playlistUrl });
-          } else {
-            showMessage("Por favor, introduce una URL de playlist válida.");
-          }
-        });
-
-        socket.on("sessionCreated", ({ sessionId, joinUrl }) => {
-          currentSessionId = sessionId;
-          sessionIdDisplay.textContent = sessionId;
-          joinLink.href = joinUrl;
-          joinLink.textContent = joinUrl;
-          sessionInfoDiv.classList.remove("hidden");
-          showMessage(
-            "Sesión creada con éxito. Comparte el enlace.",
-            "success"
-          );
-
-          // Generar código QR
-          new QRCode(qrcodeDiv, {
-            text: joinUrl,
-            width: 128,
-            height: 128,
-            colorDark: "#1d3557",
-            colorLight: "#f1faee",
-            correctLevel: QRCode.CorrectLevel.H,
-          });
-        });
-
-        socket.on("sessionError", (message) => {
-          showMessage(message);
-        });
-
-
-        socket.on("winnersFound", ({ winners }) => {
-          if (winners.length > 0) {
-            winnerDisplay.textContent = `¡Ganador(es) de BINGO: ${winners.join(
-              ", "
-            )}!`;
-            showMessage(
-              `¡BINGO! Ganador(es): ${winners.join(", ")}`,
-              "success"
-            );
-          } else {
-            winnerDisplay.textContent = "Aún no hay ganadores de BINGO.";
-            showMessage("Aún no hay ganadores de BINGO.", "info");
-          }
-        });
+        // (Admin panel logic removed)
 
         // --- Lógica de Jugador ---
         joinSessionBtn.addEventListener("click", () => {
@@ -328,20 +222,7 @@
           }
         );
 
-        socket.on(
-          "currentSongState",
-          ({ previewUrl, songTitle, isPlaying }) => {
-            // Los jugadores no reproducen audio, pero necesitan saber qué canción está "activa" para marcar
-            // El reproductor de audio del admin se maneja con el evento songUpdate.
-            // Este evento es principalmente para que los nuevos jugadores se sincronicen.
-            console.log(
-              "Estado de la canción actual recibido por el jugador:",
-              songTitle,
-              "está sonando:",
-              isPlaying
-            );
-          }
-        );
+        // (currentSongState handler removed)
 
         // Maneja el estado del jugador para los jugadores recién unidos
         socket.on(
