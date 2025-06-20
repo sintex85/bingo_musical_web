@@ -75,7 +75,6 @@ h1 {
     margin: 0 auto 24px auto;
     display: block;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.5);
 }
 
 .form-input {
