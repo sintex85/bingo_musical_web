@@ -2,6 +2,7 @@ const express = require('express')
 const http = require('http')
 const { Server } = require('socket.io')
 const admin = require('firebase-admin')
+const SpotifyWebApi = require('spotify-web-api-node')
 const serviceAccount = require('./serviceAccountKey.json')
 
 admin.initializeApp({
@@ -13,10 +14,52 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server)
 
+// Configurar Spotify API
+const spotifyApi = new SpotifyWebApi({
+  clientId: process.env.SPOTIFY_CLIENT_ID || 'tu_client_id',
+  clientSecret: process.env.SPOTIFY_CLIENT_SECRET || 'tu_client_secret'
+})
+
 // Servir archivos estáticos
 app.use(express.static('public'))
 
 const sessions = {}
+
+// Función para obtener canciones de una playlist de Spotify
+async function getSpotifyPlaylistSongs(playlistUrl) {
+  try {
+    // Extraer el ID de la playlist de la URL
+    const playlistId = playlistUrl.split('/playlist/')[1]?.split('?')[0]
+    
+    if (!playlistId) {
+      throw new Error('URL de playlist inválida')
+    }
+
+    // Obtener token de acceso
+    const data = await spotifyApi.clientCredentialsGrant()
+    spotifyApi.setAccessToken(data.body['access_token'])
+
+    // Obtener las canciones de la playlist
+    const playlist = await spotifyApi.getPlaylist(playlistId)
+    const tracks = playlist.body.tracks.items
+
+    return tracks.map(item => ({
+      title: item.track.name,
+      artist: item.track.artists[0].name,
+      id: item.track.id
+    }))
+  } catch (error) {
+    console.error('Error obteniendo playlist de Spotify:', error)
+    // Fallback a canciones de ejemplo
+    return [
+      { title: 'Canción 1', artist: 'Artista 1' },
+      { title: 'Canción 2', artist: 'Artista 2' },
+      { title: 'Canción 3', artist: 'Artista 3' },
+      { title: 'Canción 4', artist: 'Artista 4' },
+      { title: 'Canción 5', artist: 'Artista 5' }
+    ]
+  }
+}
 
 io.on('connection', socket => {
   console.log('Usuario conectado:', socket.id)
@@ -25,24 +68,19 @@ io.on('connection', socket => {
     try {
       console.log('=== INICIANDO CREACIÓN DE SESIÓN ===')
       console.log('Creando sesión con URL:', playlistUrl)
-      console.log('Estado de Firebase Admin:', admin.apps.length > 0 ? 'Inicializado' : 'NO inicializado')
-      console.log('Estado de Firestore:', db ? 'Conectado' : 'NO conectado')
       
       const sessionId = Math.random().toString(36).substring(2, 8)
       console.log('SessionId generado:', sessionId)
       
-      const allSongs = [
-        { title: 'Canción 1', artist: 'Artista 1' }, 
-        { title: 'Canción 2', artist: 'Artista 2' },
-        { title: 'Canción 3', artist: 'Artista 3' },
-        { title: 'Canción 4', artist: 'Artista 4' },
-        { title: 'Canción 5', artist: 'Artista 5' }
-      ]
+      // Obtener canciones reales de Spotify
+      console.log('Obteniendo canciones de Spotify...')
+      const allSongs = await getSpotifyPlaylistSongs(playlistUrl)
+      console.log(`Se obtuvieron ${allSongs.length} canciones`)
       
       sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
-      console.log('Sesión guardada en memoria:', sessions[sessionId])
       
-      const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3001'}?sid=${sessionId}`
+      // URL corregida sin localhost
+      const joinUrl = `https://kikobingo.com?sid=${sessionId}`
       console.log('JoinUrl generado:', joinUrl)
 
       console.log('=== INTENTANDO GUARDAR EN FIRESTORE ===')
@@ -51,20 +89,14 @@ io.on('connection', socket => {
         songs: allSongs,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
       }
-      console.log('Datos a guardar:', sessionData)
       
-      const docRef = await db.collection('sessions').doc(sessionId).set(sessionData)
+      await db.collection('sessions').doc(sessionId).set(sessionData)
       console.log('=== FIRESTORE: GUARDADO EXITOSO ===')
-      console.log('Document reference:', docRef)
 
       socket.emit('sessionCreated', { sessionId, joinUrl })
     } catch (err) {
-      console.error('=== ERROR COMPLETO ===')
-      console.error('Error name:', err.name)
-      console.error('Error message:', err.message)
-      console.error('Error code:', err.code)
-      console.error('Error stack:', err.stack)
-      socket.emit('sessionError', 'No se pudo guardar la sesión en Firebase: ' + err.message)
+      console.error('=== ERROR COMPLETO ===', err)
+      socket.emit('sessionError', 'No se pudo crear la sesión: ' + err.message)
     }
   })
 
