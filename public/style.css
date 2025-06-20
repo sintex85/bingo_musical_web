@@ -1,15 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Circular+Std:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap');
 
-/* Variables CSS estilo Spotify */
+/* Variables CSS con nueva paleta de colores */
 :root {
-    --spotify-green: #1db954;
-    --spotify-green-hover: #1ed760;
-    --spotify-black: #191414;
-    --spotify-dark-gray: #121212;
-    --spotify-gray: #282828;
-    --spotify-light-gray: #b3b3b3;
-    --spotify-white: #ffffff;
-    --spotify-text-gray: #a7a7a7;
+    --primary-color: #6366f1;        /* Indigo vibrante */
+    --primary-hover: #4f46e5;        /* Indigo más oscuro */
+    --secondary-color: #06b6d4;      /* Cyan */
+    --secondary-hover: #0891b2;      /* Cyan oscuro */
+    --accent-color: #f59e0b;         /* Amber/dorado */
+    --accent-hover: #d97706;         /* Amber oscuro */
+    --background-dark: #0f172a;      /* Slate muy oscuro */
+    --background-darker: #020617;    /* Slate casi negro */
+    --surface-color: #1e293b;        /* Slate oscuro */
+    --surface-light: #334155;        /* Slate medio */
+    --text-primary: #f8fafc;         /* Slate muy claro */
+    --text-secondary: #94a3b8;       /* Slate gris */
+    --text-muted: #64748b;           /* Slate gris oscuro */
+    --success-color: #10b981;        /* Emerald */
+    --success-hover: #059669;        /* Emerald oscuro */
+    --error-color: #ef4444;          /* Red */
+    --error-hover: #dc2626;          /* Red oscuro */
 }
 
 * {
@@ -20,8 +29,8 @@
 
 body {
     font-family: 'Circular Std', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(180deg, var(--spotify-black) 0%, var(--spotify-dark-gray) 100%);
-    color: var(--spotify-white);
+    background: linear-gradient(135deg, var(--background-darker) 0%, var(--background-dark) 50%, var(--surface-color) 100%);
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -30,24 +39,24 @@ body {
 }
 
 .container {
-    background: var(--spotify-gray);
+    background: var(--surface-color);
     border-radius: 16px;
     padding: 32px;
     max-width: 90vw;
     width: 100%;
-    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 64px rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(100, 116, 139, 0.2);
     backdrop-filter: blur(10px);
 }
 
 h1 {
     font-size: 48px;
     font-weight: 700;
-    color: var(--spotify-white);
+    color: var(--text-primary);
     margin-bottom: 24px;
     text-align: center;
     letter-spacing: -0.04em;
-    background: linear-gradient(45deg, var(--spotify-white), var(--spotify-green));
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -56,10 +65,10 @@ h1 {
 .form-input {
     width: 100%;
     padding: 12px 16px;
-    background: var(--spotify-black);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: var(--background-dark);
+    border: 2px solid var(--surface-light);
     border-radius: 8px;
-    color: var(--spotify-white);
+    color: var(--text-primary);
     font-size: 16px;
     font-weight: 500;
     transition: all 0.2s ease;
@@ -68,17 +77,17 @@ h1 {
 
 .form-input:focus {
     outline: none;
-    border-color: var(--spotify-green);
-    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .form-input::placeholder {
-    color: var(--spotify-text-gray);
+    color: var(--text-muted);
 }
 
 .btn {
-    background: var(--spotify-green);
-    color: var(--spotify-black);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: var(--text-primary);
     padding: 12px 32px;
     border: none;
     border-radius: 50px;
@@ -93,52 +102,56 @@ h1 {
     text-transform: none;
     letter-spacing: 0.1em;
     min-height: 48px;
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
 }
 
 .btn:hover {
-    background: var(--spotify-green-hover);
-    transform: scale(1.04);
+    background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(99, 102, 241, 0.6);
 }
 
 .btn:active {
-    transform: scale(0.96);
+    transform: translateY(0);
 }
 
 .btn-green {
-    background: var(--spotify-green);
-    color: var(--spotify-black);
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
+    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);
 }
 
 .btn-green:hover {
-    background: var(--spotify-green-hover);
+    background: linear-gradient(135deg, var(--success-hover) 0%, var(--success-color) 100%);
+    box-shadow: 0 8px 25px 0 rgba(16, 185, 129, 0.6);
 }
 
 .btn-secondary {
     background: transparent;
-    color: var(--spotify-white);
-    border: 2px solid var(--spotify-white);
+    color: var(--text-primary);
+    border: 2px solid var(--secondary-color);
 }
 
 .btn-secondary:hover {
-    background: var(--spotify-white);
-    color: var(--spotify-black);
+    background: var(--secondary-color);
+    color: var(--background-dark);
 }
 
-/* Cartón de Bingo estilo Spotify */
+/* Cartón de Bingo con nuevos colores */
 .bingo-card {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    background: var(--spotify-black);
+    background: var(--background-dark);
     padding: 24px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-light);
     margin: 24px 0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .bingo-cell {
-    background: var(--spotify-gray);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--surface-color);
+    border: 1px solid var(--surface-light);
     border-radius: 8px;
     padding: 12px;
     min-height: 100px;
@@ -154,9 +167,10 @@ h1 {
 }
 
 .bingo-cell:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--spotify-green);
+    background: var(--surface-light);
+    border-color: var(--secondary-color);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
 }
 
 .bingo-cell p {
@@ -167,25 +181,26 @@ h1 {
 .bingo-cell .font-bold {
     font-weight: 600;
     font-size: 14px;
-    color: var(--spotify-white);
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .bingo-cell .text-sm {
     font-size: 12px;
-    color: var(--spotify-text-gray);
+    color: var(--text-secondary);
     font-weight: 400;
 }
 
 .bingo-cell.marked {
-    background: var(--spotify-green);
-    border-color: var(--spotify-green-hover);
-    color: var(--spotify-black);
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    border-color: var(--accent-hover);
+    color: var(--background-dark);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .bingo-cell.marked .font-bold,
 .bingo-cell.marked .text-sm {
-    color: var(--spotify-black);
+    color: var(--background-dark);
 }
 
 .bingo-cell.marked::after {
@@ -195,8 +210,8 @@ h1 {
     right: 8px;
     width: 20px;
     height: 20px;
-    background: var(--spotify-black);
-    color: var(--spotify-green);
+    background: var(--background-dark);
+    color: var(--accent-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -207,10 +222,10 @@ h1 {
 
 /* Sección de información de sesión */
 #session-info {
-    background: var(--spotify-black);
+    background: var(--background-dark);
     padding: 24px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-light);
     margin-top: 24px;
 }
 
@@ -220,24 +235,24 @@ h1 {
 }
 
 #join-link {
-    color: var(--spotify-green);
+    color: var(--secondary-color);
     text-decoration: none;
     font-weight: 500;
     display: block;
     padding: 12px;
-    background: rgba(29, 185, 84, 0.1);
+    background: rgba(6, 182, 212, 0.1);
     border-radius: 8px;
     margin: 16px 0;
     transition: all 0.2s ease;
 }
 
 #join-link:hover {
-    background: rgba(29, 185, 84, 0.2);
+    background: rgba(6, 182, 212, 0.2);
     text-decoration: underline;
 }
 
 .qr-code-container {
-    background: var(--spotify-white);
+    background: var(--text-primary);
     padding: 16px;
     border-radius: 12px;
     display: inline-block;
@@ -246,12 +261,12 @@ h1 {
 
 /* Estado del juego */
 .game-status {
-    background: var(--spotify-black);
+    background: var(--background-dark);
     padding: 16px;
     border-radius: 8px;
     margin-top: 16px;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--surface-light);
 }
 
 .game-status p {
@@ -261,8 +276,8 @@ h1 {
 }
 
 #win-message {
-    background: linear-gradient(45deg, var(--spotify-green), var(--spotify-green-hover));
-    color: var(--spotify-black);
+    background: linear-gradient(45deg, var(--success-color), var(--secondary-color));
+    color: var(--text-primary);
     padding: 16px;
     border-radius: 12px;
     font-size: 24px;
@@ -270,6 +285,7 @@ h1 {
     text-align: center;
     margin-top: 16px;
     animation: pulse 2s infinite;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
 }
 
 @keyframes pulse {
@@ -286,7 +302,7 @@ h1 {
     transform: translateX(-50%);
     padding: 16px 24px;
     border-radius: 8px;
-    color: var(--spotify-white);
+    color: var(--text-primary);
     font-weight: 500;
     z-index: 1000;
     opacity: 0;
@@ -294,6 +310,7 @@ h1 {
     transition: all 0.3s ease;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
+    border: 1px solid var(--surface-light);
 }
 
 #message-box.show {
@@ -305,7 +322,7 @@ h1 {
 /* Etiquetas y textos */
 label {
     display: block;
-    color: var(--spotify-white);
+    color: var(--text-primary);
     font-weight: 500;
     margin-bottom: 8px;
     font-size: 16px;
@@ -376,22 +393,22 @@ label {
     }
 }
 
-/* Scrollbar personalizado estilo Spotify */
+/* Scrollbar personalizado con nuevos colores */
 ::-webkit-scrollbar {
     width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--spotify-black);
+    background: var(--background-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--spotify-gray);
+    background: var(--surface-color);
     border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--spotify-light-gray);
+    background: var(--surface-light);
 }
 
 /* Animaciones suaves */
@@ -402,6 +419,6 @@ label {
 /* Efectos de foco para accesibilidad */
 .btn:focus,
 .form-input:focus {
-    outline: 2px solid var(--spotify-green);
+    outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
