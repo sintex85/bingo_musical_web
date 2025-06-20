@@ -49,11 +49,6 @@
         <div id="qrcode" class="qr-code-container mx-auto"></div>
 
         
-        <audio id="audio-player" class="w-full mt-4 rounded-lg hidden"></audio>
-        <div
-          id="winner-display"
-          class="mt-4 text-xl font-bold text-yellow-300"
-        ></div>
         
       </div>
     </div>
@@ -160,11 +155,7 @@
         const joinLink = document.getElementById("join-link");
         const qrcodeDiv = document.getElementById("qrcode");
         const sessionInfoDiv = document.getElementById("session-info");
-        const audioPlayer = document.getElementById("audio-player");
-        const playPauseBtn = document.getElementById("play-pause-btn");
-        const nextSongBtn = document.getElementById("next-song-btn");
-        const checkWinnersBtn = document.getElementById("check-winners-btn");
-        const winnerDisplay = document.getElementById("winner-display");
+        
 
         const joinSessionIdInput = document.getElementById("join-session-id");
         const joinSessionBtn = document.getElementById("join-session-btn");
@@ -214,22 +205,7 @@
         });
 
 
-        socket.on("winnersFound", ({ winners }) => {
-          if (winners.length > 0) {
-            winnerDisplay.textContent = `¡Ganador(es) de BINGO: ${winners.join(
-              ", "
-            )}!`;
-            showMessage(
-              `¡BINGO! Ganador(es): ${winners.join(", ")}`,
-              "success"
-            );
-          } else {
-            winnerDisplay.textContent = "Aún no hay ganadores de BINGO.";
-            showMessage("Aún no hay ganadores de BINGO.", "info");
-          }
-        });
 
-        // --- Lógica de Jugador ---
         joinSessionBtn.addEventListener("click", () => {
           const sid = joinSessionIdInput.value.trim();
           if (sid) {
@@ -289,35 +265,7 @@
           }
         );
 
-        socket.on(
-          "currentSongState",
-          ({ previewUrl, songTitle, isPlaying }) => {
-            // Los jugadores no reproducen audio, pero necesitan saber qué canción está "activa" para marcar
-            // El reproductor de audio del admin se maneja con el evento songUpdate.
-            // Este evento es principalmente para que los nuevos jugadores se sincronicen.
-            console.log(
-              "Estado de la canción actual recibido por el jugador:",
-              songTitle,
-              "está sonando:",
-              isPlaying
-            );
-          }
-        );
 
-        // Maneja el estado del jugador para los jugadores recién unidos
-        socket.on(
-          "playerState",
-          ({ markedSongs: playerMarkedSongs, linesCompleted, isBingo }) => {
-            markedSongs = new Set(playerMarkedSongs);
-            renderBingoCard(currentBingoCard);
-            updatePlayerStats();
-            if (isBingo) {
-              winMessageDiv.classList.remove("hidden");
-            } else {
-              winMessageDiv.classList.add("hidden");
-            }
-          }
-        );
 
         function renderBingoCard(card) {
           bingoCardDiv.innerHTML = "";
