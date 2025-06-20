@@ -14,20 +14,9 @@
   <body class="flex flex-col justify-center items-center min-h-screen p-4">
     <div id="message-box" class="rounded-lg shadow-lg"></div>
 
-    <div id="role-selection" class="container w-full max-w-lg mx-auto">
-      <h1>¡Bingo Musical!</h1>
-      <p class="text-lg mb-6">¿Eres el administrador o un jugador?</p>
-      <div class="flex flex-col md:flex-row gap-4 justify-center">
-        <button id="admin-btn" class="btn btn-blue">
-          <i class="fas fa-user-shield"></i> Soy Admin
-        </button>
-        <button id="player-btn" class="btn btn-green">
-          <i class="fas fa-users"></i> Soy Jugador
-        </button>
-      </div>
-    </div>
+    <!-- Role selection removed -->
 
-    <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
+    <div id="admin-panel" class="container w-full max-w-2xl mx-auto">
       <h1>Panel de Administración</h1>
       <div id="create-session-section">
         <label for="playlist-url" class="block text-lg mb-2"
@@ -166,12 +155,8 @@
         let currentBingoCard = []; // Almacena el cartón de bingo del jugador
         let markedSongs = new Set(); // Almacena los IDs de las canciones marcadas por el jugador actual
 
-        const roleSelectionDiv = document.getElementById("role-selection");
         const adminPanelDiv = document.getElementById("admin-panel");
         const playerViewDiv = document.getElementById("player-view");
-
-        const adminBtn = document.getElementById("admin-btn");
-        const playerBtn = document.getElementById("player-btn");
 
         const createSessionBtn = document.getElementById("create-session-btn");
         const playlistUrlInput = document.getElementById("playlist-url");
@@ -194,27 +179,7 @@
         const linesCountSpan = document.getElementById("lines-count");
         const winMessageDiv = document.getElementById("win-message");
 
-        // --- Lógica de Selección de Rol ---
-        adminBtn.addEventListener("click", () => {
-          roleSelectionDiv.classList.add("hidden");
-          adminPanelDiv.classList.remove("hidden");
-          // Informa al servidor que este socket es un admin
-          socket.emit("setRole", { role: "admin" });
-        });
-
-        playerBtn.addEventListener("click", () => {
-          roleSelectionDiv.classList.add("hidden");
-          playerViewDiv.classList.remove("hidden");
-          // Informa al servidor que este socket es un jugador
-          socket.emit("setRole", { role: "player" });
-          // Si la URL contiene el ID de sesión, unirse automáticamente
-          const urlParams = new URLSearchParams(window.location.search);
-          const sid = urlParams.get("sid");
-          if (sid) {
-            joinSessionIdInput.value = sid;
-            joinSessionBtn.click(); // Dispara la unión
-          }
-        });
+        // --- Lógica de Selección de Rol eliminada (admin/usuario) ---
 
         // --- Lógica de Admin ---
         createSessionBtn.addEventListener("click", () => {
@@ -453,7 +418,6 @@
       const initSid = new URLSearchParams(window.location.search).get("sid");
       if (initSid) {
           socket.emit('setRole', { role: 'player' });
-          roleSelectionDiv.classList.add('hidden');
           playerViewDiv.classList.remove('hidden');
           // Generar un ID de jugador
           userId = 'player_' + Math.random().toString(36).substring(2, 9);
