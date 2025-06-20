@@ -16,7 +16,7 @@
 
     <!-- Role selection removed -->
 
-    <div id="admin-panel" class="container w-full max-w-2xl mx-auto">
+    <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
       <h1>Panel de Administración</h1>
       <div id="create-session-section">
         <label for="playlist-url" class="block text-lg mb-2"
@@ -414,14 +414,21 @@
 
           linesCountSpan.textContent = lines;
         }
-      // Auto‑unirse si la URL contiene sid
+      // Decide vista según presence de sid en la URL
       const initSid = new URLSearchParams(window.location.search).get("sid");
       if (initSid) {
+          // Modo jugador
           socket.emit('setRole', { role: 'player' });
+          adminPanelDiv.classList.add('hidden');
           playerViewDiv.classList.remove('hidden');
-          // Generar un ID de jugador
+          // Generar un ID de jugador e unirse automáticamente
           userId = 'player_' + Math.random().toString(36).substring(2, 9);
           socket.emit('joinSession', { sessionId: initSid, userId });
+      } else {
+          // Modo administrador
+          socket.emit('setRole', { role: 'admin' });
+          adminPanelDiv.classList.remove('hidden');
+          playerViewDiv.classList.add('hidden');
       }
       }); // Fin del listener de DOMContentLoaded
     </script>
