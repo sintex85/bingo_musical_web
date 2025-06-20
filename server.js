@@ -30,28 +30,42 @@ const sessions = {}
 // Función para obtener canciones de una playlist de Spotify
 async function getSpotifyPlaylistSongs(playlistUrl) {
   try {
+    console.log('🎵 === SPOTIFY DEBUG ===')
+    console.log('Client ID:', process.env.SPOTIFY_CLIENT_ID)
+    console.log('Client Secret existe:', !!process.env.SPOTIFY_CLIENT_SECRET)
+    console.log('URL recibida:', playlistUrl)
+    
     // Extraer el ID de la playlist de la URL
     const playlistId = playlistUrl.split('/playlist/')[1]?.split('?')[0]
+    console.log('Playlist ID extraído:', playlistId)
     
     if (!playlistId) {
       throw new Error('URL de playlist inválida')
     }
 
     // Obtener token de acceso
+    console.log('Obteniendo token de Spotify...')
     const data = await spotifyApi.clientCredentialsGrant()
     spotifyApi.setAccessToken(data.body['access_token'])
+    console.log('✅ Token obtenido correctamente')
 
     // Obtener las canciones de la playlist
+    console.log('Obteniendo playlist...')
     const playlist = await spotifyApi.getPlaylist(playlistId)
     const tracks = playlist.body.tracks.items
+    console.log(`✅ Se obtuvieron ${tracks.length} tracks de Spotify`)
 
-    return tracks.map(item => ({
+    const songs = tracks.map(item => ({
       title: item.track.name,
       artist: item.track.artists[0].name,
       id: item.track.id
     }))
+    
+    console.log('Primeras 3 canciones:', songs.slice(0, 3))
+    return songs
   } catch (error) {
-    console.error('Error obteniendo playlist de Spotify:', error)
+    console.error('❌ Error obteniendo playlist de Spotify:', error.message)
+    console.error('Usando canciones de ejemplo...')
     // Fallback a canciones de ejemplo
     return [
       { title: 'Canción 1', artist: 'Artista 1' },
@@ -81,7 +95,7 @@ io.on('connection', socket => {
       
       sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
       
-      // URL corregida sin localhost
+      // URL con dominio correcto
       const joinUrl = `https://kikobingo.com?sid=${sessionId}`
       console.log('JoinUrl generado:', joinUrl)
 
