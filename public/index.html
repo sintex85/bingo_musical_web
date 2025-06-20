@@ -267,35 +267,28 @@
 
         function updatePlayerStats() {
             const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
-            const totalCells = cells.length;       // deberían ser 20
+            const totalCells = cells.length;       // should be 20
             const totalMarked = [...cells].filter(c => c.classList.contains("marked")).length;
             markedCountSpan.textContent = `${totalMarked} / ${totalCells}`;
 
-            // Comprobar líneas horizontales (4 filas × 5 cols)
-            const cols = 5, rows = 4;
-            let lines = 0;
-            for (let r = 0; r < rows; r++) {
-                let markedInRow = 0;
-                for (let c = 0; c < cols; c++) {
-                if (cells[r * cols + c].classList.contains("marked")) markedInRow++;
-                }
-                if (markedInRow === cols) lines++;
-            }
-            linesCountSpan.textContent = lines;
+            // LINEA once you have 5 or more marked (but less than full card)
+            const hasLine = totalMarked >= 5 && totalMarked < totalCells;
+            linesCountSpan.textContent = hasLine ? 1 : 0;
 
-            // Mensajes de línea/bingo
             if (totalMarked === totalCells) {
+                // BINGO when all are marked
                 winMessageDiv.textContent = "¡BINGO!";
                 winMessageDiv.classList.remove("hidden");
                 showMessage("¡BINGO! Has completado todas las canciones.", "success");
-            } else if (lines > 0) {
+            } else if (hasLine) {
+                // LINEA when at least 5 marked
                 winMessageDiv.textContent = "¡LÍNEA!";
                 winMessageDiv.classList.remove("hidden");
-                showMessage(`¡LÍNEA! Has completado ${lines} línea${lines>1?"s":""}.`, "info");
+                showMessage(`¡LÍNEA! Has marcado ${totalMarked} canciones.`, "info");
             } else {
                 winMessageDiv.classList.add("hidden");
             }
-            }
+        }
       // Decide vista según presence de sid en la URL
       const initSid = new URLSearchParams(window.location.search).get("sid");
       if (initSid) {
