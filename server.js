@@ -23,8 +23,14 @@ io.on('connection', socket => {
 
   socket.on('createSession', async ({ playlistUrl }) => {
     try {
+      console.log('=== INICIANDO CREACIÓN DE SESIÓN ===')
       console.log('Creando sesión con URL:', playlistUrl)
+      console.log('Estado de Firebase Admin:', admin.apps.length > 0 ? 'Inicializado' : 'NO inicializado')
+      console.log('Estado de Firestore:', db ? 'Conectado' : 'NO conectado')
+      
       const sessionId = Math.random().toString(36).substring(2, 8)
+      console.log('SessionId generado:', sessionId)
+      
       const allSongs = [
         { title: 'Canción 1', artist: 'Artista 1' }, 
         { title: 'Canción 2', artist: 'Artista 2' },
@@ -32,21 +38,33 @@ io.on('connection', socket => {
         { title: 'Canción 4', artist: 'Artista 4' },
         { title: 'Canción 5', artist: 'Artista 5' }
       ]
+      
       sessions[sessionId] = { playlistUrl, songs: allSongs, players: {} }
+      console.log('Sesión guardada en memoria:', sessions[sessionId])
+      
       const joinUrl = `${process.env.PUBLIC_URL || 'http://localhost:3000'}?sid=${sessionId}`
+      console.log('JoinUrl generado:', joinUrl)
 
-      console.log('Guardando sesión en Firestore...')
-      const docRef = await db.collection('sessions').doc(sessionId).set({
+      console.log('=== INTENTANDO GUARDAR EN FIRESTORE ===')
+      const sessionData = {
         playlistUrl,
         songs: allSongs,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
-      })
-      console.log('Sesión guardada exitosamente en Firestore')
+      }
+      console.log('Datos a guardar:', sessionData)
+      
+      const docRef = await db.collection('sessions').doc(sessionId).set(sessionData)
+      console.log('=== FIRESTORE: GUARDADO EXITOSO ===')
+      console.log('Document reference:', docRef)
 
       socket.emit('sessionCreated', { sessionId, joinUrl })
     } catch (err) {
-      console.error('Error guardando sesión en Firestore:', err)
-      socket.emit('sessionError', 'No se pudo guardar la sesión en Firebase')
+      console.error('=== ERROR COMPLETO ===')
+      console.error('Error name:', err.name)
+      console.error('Error message:', err.message)
+      console.error('Error code:', err.code)
+      console.error('Error stack:', err.stack)
+      socket.emit('sessionError', 'No se pudo guardar la sesión en Firebase: ' + err.message)
     }
   })
 
@@ -81,6 +99,29 @@ io.on('connection', socket => {
     }
   })
 })
+
+// Función de prueba para verificar conexión
+async function testFirestoreConnection() {
+  try {
+    console.log('=== PROBANDO CONEXIÓN A FIRESTORE ===')
+    const testDoc = await db.collection('test').doc('connection').set({
+      message: 'Conexión exitosa',
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    })
+    console.log('✅ Firestore conectado correctamente')
+    
+    // Leer el documento para confirmar
+    const doc = await db.collection('test').doc('connection').get()
+    if (doc.exists) {
+      console.log('✅ Lectura confirmada:', doc.data())
+    }
+  } catch (error) {
+    console.error('❌ Error conectando a Firestore:', error)
+  }
+}
+
+// Llamar la función de prueba al iniciar
+testFirestoreConnection()
 
 server.listen(3000, () => {
   console.log('Servidor escuchando en puerto 3000')
