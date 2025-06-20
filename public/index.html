@@ -95,6 +95,7 @@
       </div>
     </div>
 
+    <!-- ELIMINAR COMPLETAMENTE esta sección del admin -->
     <div id="player-view" class="container w-full max-w-3xl mx-auto hidden">
       <!-- Header con logo para vista de jugador -->
       <div class="player-header">
@@ -400,26 +401,29 @@
 
         // Función para renderizar la lista de canciones del admin
         function renderAdminSongList() {
-          console.log('Renderizando lista de canciones...'); // Debug
+          console.log('=== RENDERIZANDO LISTA DE CANCIONES ===')
+          console.log('adminSongs:', adminSongs)
+          
           const songListContainer = document.getElementById("song-list-container");
           
           if (!songListContainer) {
-            console.error('No se encontró el contenedor de canciones');
+            console.error('❌ No se encontró el contenedor song-list-container');
             return;
           }
           
           songListContainer.innerHTML = "";
           
           if (adminSongs && adminSongs.length > 0) {
-            console.log(`Renderizando ${adminSongs.length} canciones`); // Debug
+            console.log(`✅ Renderizando ${adminSongs.length} canciones`)
+            
             adminSongs.forEach((song, index) => {
               const songItem = document.createElement("div");
               songItem.classList.add("admin-song-item");
               songItem.innerHTML = `
                 <span class="song-number">${index + 1}</span>
                 <div class="song-info">
-                  <div class="song-title">${song.title}</div>
-                  <div class="song-artist">${song.artist}</div>
+                  <div class="song-title">${song.title || 'Título desconocido'}</div>
+                  <div class="song-artist">${song.artist || 'Artista desconocido'}</div>
                 </div>
                 <div class="song-status">
                   <i class="fas fa-circle"></i>
@@ -428,12 +432,16 @@
               
               songItem.addEventListener("click", () => {
                 songItem.classList.toggle("played");
+                console.log(`Canción ${index + 1} marcada como reproducida:`, songItem.classList.contains("played"));
               });
               
               songListContainer.appendChild(songItem);
             });
+            
+            console.log('✅ Lista renderizada correctamente');
           } else {
-            console.log('No hay canciones para mostrar'); // Debug
+            console.log('❌ No hay canciones para mostrar');
+            songListContainer.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px;">No s\'han carregat les cançons</p>';
           }
         }
 
@@ -448,20 +456,13 @@
           userId = "player_" + Math.random().toString(36).substring(2, 9);
           socket.emit("joinSession", { sessionId: initSid, userId });
         } else {
-          // Modo administrador - OCULTAR COMPLETAMENTE la sección de unirse
+          // Modo administrador
           socket.emit("setRole", { role: "admin" });
           adminPanelDiv.classList.remove("hidden");
           playerViewDiv.classList.add("hidden");
-          
-          // Asegurar que NUNCA se vea la sección de unirse en admin
-          const joinSessionSection = document.getElementById("join-session-section");
-          if (joinSessionSection) {
-            joinSessionSection.style.display = "none";
-          }
-          
           setTimeout(checkOrientation, 100);
         }
-      }); // Fin del listener de DOMContentLoaded
+      });
     </script>
   </body>
 </html>

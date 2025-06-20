@@ -115,8 +115,13 @@ io.on('connection', socket => {
       await db.collection('sessions').doc(sessionId).set(sessionData)
       console.log('=== FIRESTORE: GUARDAT EXITÓS ===')
 
-      // Enviar las canciones al admin junto con la información de la sesión
-      socket.emit('sessionCreated', { sessionId, joinUrl, songs: allSongs })
+      // IMPORTANTE: Enviar las canciones al admin
+      console.log('Enviant resposta amb', allSongs.length, 'cançons al client...')
+      socket.emit('sessionCreated', { 
+        sessionId, 
+        joinUrl, 
+        songs: allSongs 
+      })
     } catch (err) {
       console.error('=== ERROR COMPLET ===', err)
       socket.emit('sessionError', 'No s\'ha pogut crear la sessió: ' + err.message)
