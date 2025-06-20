@@ -281,20 +281,10 @@
                         <p class="text-sm">${song.artist}</p>
                     `;
             cell.addEventListener("click", () => {
-              if (!currentSessionId) {
-                showMessage("No estás en una sesión activa.");
-                return;
-              }
-              if (cell.classList.contains("marked")) {
-                showMessage("Esta canción ya está marcada.");
-                return;
-              }
-              // Informa al servidor sobre el clic
-              socket.emit("markSong", {
-                sessionId: currentSessionId,
-                userId: userId,
-                songId: song.id,
-              });
+              // Toggle marked state
+              cell.classList.toggle("marked");
+              // Recompute and display stats
+              updatePlayerStats();
             });
             bingoCardDiv.appendChild(cell);
           });
