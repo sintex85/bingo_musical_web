@@ -46,8 +46,10 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
     // Obtener token de acceso
     console.log('Obteniendo token de Spotify...')
     const data = await spotifyApi.clientCredentialsGrant()
-    spotifyApi.setAccessToken(data.body['access_token'])
-    console.log('✅ Token obtenido correctamente')
+    
+    // IMPORTANTE: aplicar el token antes de hacer cualquier llamada
+    spotifyApi.setAccessToken(data.body.access_token)
+    console.log('✅ Token aplicado correctamente:', data.body.access_token.substring(0, 20) + '...')
 
     // Obtener las canciones de la playlist
     console.log('Obteniendo playlist...')
