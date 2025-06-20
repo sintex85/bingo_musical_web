@@ -778,20 +778,14 @@ label {
     66% { transform: translate(-20px, 20px) rotate(240deg); }
 }
 
-/* Responsive Design con orientación */
+/* Responsive Design con orientación - solo para vista de jugador */
 @media (max-width: 768px) and (orientation: portrait) {
-    #orientation-warning {
-        display: flex;
-    }
-    
-    .container {
-        display: none !important;
-    }
+    /* Remover reglas globales de aquí */
 }
 
 @media (max-width: 768px) and (orientation: landscape) {
     #orientation-warning {
-        display: none;
+        display: none !important;
     }
     
     .container {
@@ -888,10 +882,19 @@ label {
 /* Para tablets en portrait - permitir sin rotación */
 @media (min-width: 768px) and (orientation: portrait) {
     #orientation-warning {
-        display: none;
+        display: none !important;
     }
     
     .container {
         display: block !important;
     }
+}
+
+/* Reglas específicas para cuando el aviso está activo */
+body.orientation-blocked .container {
+    display: none !important;
+}
+
+body.orientation-blocked #orientation-warning {
+    display: flex !important;
 }

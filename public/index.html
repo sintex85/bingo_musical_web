@@ -167,8 +167,11 @@
           const warning = document.getElementById('orientation-warning');
           const isMobile = window.innerWidth <= 768;
           const isPortrait = window.innerHeight > window.innerWidth;
+          const playerView = document.getElementById('player-view');
+          const isPlayerViewVisible = !playerView.classList.contains('hidden');
           
-          if (isMobile && isPortrait) {
+          // Solo mostrar aviso si es móvil, en portrait Y está en vista de jugador
+          if (isMobile && isPortrait && isPlayerViewVisible) {
             warning.style.display = 'flex';
           } else {
             warning.style.display = 'none';
@@ -348,6 +351,8 @@
           socket.emit("setRole", { role: "player" });
           adminPanelDiv.classList.add("hidden");
           playerViewDiv.classList.remove("hidden");
+          // Verificar orientación después de mostrar vista de jugador
+          setTimeout(checkOrientation, 100);
           // Generar un ID de jugador e unirse automáticamente
           userId = "player_" + Math.random().toString(36).substring(2, 9);
           socket.emit("joinSession", { sessionId: initSid, userId });
@@ -356,6 +361,8 @@
           socket.emit("setRole", { role: "admin" });
           adminPanelDiv.classList.remove("hidden");
           playerViewDiv.classList.add("hidden");
+          // Asegurar que no se muestre el aviso en modo admin
+          setTimeout(checkOrientation, 100);
         }
       }); // Fin del listener de DOMContentLoaded
     </script>
