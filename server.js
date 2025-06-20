@@ -1,9 +1,46 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccountKey.json');
+const admin = require('firebase-admin')
+const serviceAccount = require('./serviceAccountKey.json')
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
-});
-const db = admin.firestore();
+})
+const db = admin.firestore()
+
+io.on('connection', socket => {
+  socket.on('createSession', async ({ playlistUrl }) => {
+    // …tu lógica para generar sessionId y allSongs…
+    sessions[sessionId] = { /* … */ }
+
+    // ← Aquí persistes la sesión en Firestore:
+    await db.collection('sessions').doc(sessionId).set({
+      playlistUrl,
+      songs: allSongs,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    })
+
+    socket.emit('sessionCreated', { sessionId, joinUrl })
+  })
+
+  socket.on('joinSession', async ({ sessionId, userId }) => {
+    // …tu lógica de join…
+    const bingoCard = /* … */
+    sessions[sessionId].players[userId] = { bingoCard, /* … */ }
+
+    // ← Y aquí persistes al jugador:
+    await db
+      .collection('sessions').doc(sessionId)
+      .collection('players').doc(userId)
+      .set({
+        bingoCard,
+        markedSongs: [],
+        linesCompleted: 0,
+        isBingo: false,
+        joinedAt: admin.firestore.FieldValue.serverTimestamp()
+      })
+
+    socket.emit('sessionJoined', { sessionId, bingoCard })
+    socket.join(sessionId)
+  })
+})
 
 function updatePlayerStats() {
   const cells = bingoCardDiv.querySelectorAll(".bingo-cell");
