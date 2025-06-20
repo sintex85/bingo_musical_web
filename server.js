@@ -53,7 +53,7 @@ let tokenExpiryTime = 0;
 //                 markedSongs: Set<string>, // Set of song IDs marked by this player
 //                 linesCompleted: number,
 //                 isBingo: boolean,
-//                 bingoCard: [{ id: string, title: string, artist: string }] // 25 songs for this player
+//                 bingoCard: [{ id: string, title: string, artist: string }] // 20 songs for this player
 //             }
 //         },
 //         adminAudioPlayer: null | NodeJS.Timeout // Timeout for 30s preview
@@ -226,8 +226,8 @@ io.on('connection', (socket) => {
         try {
             const allSongs = await getPlaylistTracks(playlistId);
             console.log('[STEP-4] Canciones obtenidas:', allSongs.length);
-            if (allSongs.length < 25) {
-                socket.emit('sessionError', `La playlist debe tener al menos 25 canciones. Solo se encontraron ${allSongs.length}.`);
+            if (allSongs.length < 20) {
+                socket.emit('sessionError', `La playlist debe tener al menos 20 canciones. Solo se encontraron ${allSongs.length}.`);
                 return;
             }
             const sessionId = Math.random().toString(36).substring(2, 9); // Generate a simple unique ID
@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
         } else {
             // New player
             const availableSongs = shuffleArray([...sessions[sessionId].songs]);
-            const bingoCard = availableSongs.slice(0, 25);
+            const bingoCard = availableSongs.slice(0, 20);
             sessions[sessionId].players[userId] = {
                 socketId: socket.id,
                 markedSongs: new Set(),
