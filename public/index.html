@@ -12,6 +12,15 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body class="flex flex-col justify-center items-center min-h-screen p-4">
+    <!-- Mensaje de orientación para móviles -->
+    <div id="orientation-warning">
+      <div class="rotate-icon">
+        <i class="fas fa-mobile-alt"></i>
+      </div>
+      <h2>Gira el teu dispositiu</h2>
+      <p>Per a una millor experiència de joc, si us plau gira el teu mòbil a mode horitzontal (paisatge).</p>
+    </div>
+
     <div id="message-box" class="rounded-lg shadow-lg"></div>
 
     <div id="admin-panel" class="container w-full max-w-2xl mx-auto hidden">
@@ -64,7 +73,17 @@
     </div>
 
     <div id="player-view" class="container w-full max-w-3xl mx-auto hidden">
-      <h1>El Teu Cartó de Bingo</h1>
+      <!-- Header con logo para vista de jugador -->
+      <div class="player-header">
+        <div class="player-logo-container">
+          <img src="/img/kiko.png" class="player-logo-image" alt="KikoBingo" />
+          <div>
+            <h1 class="player-title">KikoBingo</h1>
+            <p class="player-subtitle">Bingo Musical Interactiu</p>
+          </div>
+        </div>
+      </div>
+
       <div id="join-session-section">
         <label for="join-session-id" class="block text-lg mb-2"
           >Introdueix l'ID de Sessió:</label
@@ -143,6 +162,26 @@
       }
 
       window.addEventListener("DOMContentLoaded", () => {
+        // Función para detectar orientación y mostrar/ocultar aviso
+        function checkOrientation() {
+          const warning = document.getElementById('orientation-warning');
+          const isMobile = window.innerWidth <= 768;
+          const isPortrait = window.innerHeight > window.innerWidth;
+          
+          if (isMobile && isPortrait) {
+            warning.style.display = 'flex';
+          } else {
+            warning.style.display = 'none';
+          }
+        }
+
+        // Verificar orientación al cargar y al cambiar
+        checkOrientation();
+        window.addEventListener('orientationchange', () => {
+          setTimeout(checkOrientation, 100);
+        });
+        window.addEventListener('resize', checkOrientation);
+
         socket.emit("setRole", { role: "admin" });
         if (typeof socket === "undefined") {
           console.error(
