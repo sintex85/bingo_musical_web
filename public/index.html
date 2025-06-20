@@ -48,11 +48,13 @@
         ></a>
         <div id="qrcode" class="qr-code-container mx-auto"></div>
 
+        
         <audio id="audio-player" class="w-full mt-4 rounded-lg hidden"></audio>
         <div
           id="winner-display"
           class="mt-4 text-xl font-bold text-yellow-300"
         ></div>
+        
       </div>
     </div>
 
@@ -134,7 +136,7 @@
 
       // Envuelve el resto de la lógica en DOMContentLoaded para asegurar que los elementos HTML existen
       window.addEventListener("DOMContentLoaded", () => {
-        socket.emit("setRole", { role: "admin" });
+        socket.emit('setRole', { role: 'admin' });
         // Si 'socket' no se pudo inicializar (porque 'io' no estaba definido), no continuar con la lógica que lo usa
         if (typeof socket === "undefined") {
           console.error(
@@ -210,6 +212,7 @@
         socket.on("sessionError", (message) => {
           showMessage(message);
         });
+
 
         socket.on("winnersFound", ({ winners }) => {
           if (winners.length > 0) {
@@ -406,22 +409,22 @@
 
           linesCountSpan.textContent = lines;
         }
-        // Decide vista según presence de sid en la URL
-        const initSid = new URLSearchParams(window.location.search).get("sid");
-        if (initSid) {
+      // Decide vista según presence de sid en la URL
+      const initSid = new URLSearchParams(window.location.search).get("sid");
+      if (initSid) {
           // Modo jugador
-          socket.emit("setRole", { role: "player" });
-          adminPanelDiv.classList.add("hidden");
-          playerViewDiv.classList.remove("hidden");
+          socket.emit('setRole', { role: 'player' });
+          adminPanelDiv.classList.add('hidden');
+          playerViewDiv.classList.remove('hidden');
           // Generar un ID de jugador e unirse automáticamente
-          userId = "player_" + Math.random().toString(36).substring(2, 9);
-          socket.emit("joinSession", { sessionId: initSid, userId });
-        } else {
+          userId = 'player_' + Math.random().toString(36).substring(2, 9);
+          socket.emit('joinSession', { sessionId: initSid, userId });
+      } else {
           // Modo administrador
-          socket.emit("setRole", { role: "admin" });
-          adminPanelDiv.classList.remove("hidden");
-          playerViewDiv.classList.add("hidden");
-        }
+          socket.emit('setRole', { role: 'admin' });
+          adminPanelDiv.classList.remove('hidden');
+          playerViewDiv.classList.add('hidden');
+      }
       }); // Fin del listener de DOMContentLoaded
     </script>
   </body>
