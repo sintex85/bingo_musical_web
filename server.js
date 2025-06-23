@@ -85,6 +85,16 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
   }
 }
 
+// Función para barajar un array (algoritmo Fisher-Yates)
+function shuffleArray(array) {
+  const shuffled = [...array]; // Crear una copia
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 io.on('connection', socket => {
   console.log('Usuari connectat:', socket.id)
 
@@ -131,33 +141,58 @@ io.on('connection', socket => {
   socket.on('joinSession', async ({ sessionId, userId }) => {
     try {
       if (!sessions[sessionId]) {
-        return socket.emit('sessionError', 'Sessió no trobada')
+        return socket.emit('sessionError', 'Sessió no trobada');
       }
       
-      console.log(`Usuari ${userId} unint-se a sessió ${sessionId}`)
-      const bingoCard = sessions[sessionId].songs.slice(0, 20)
-      sessions[sessionId].players[userId] = { bingoCard }
+      console.log(`=== JUGADOR UNIÉNDOSE ===`);
+      console.log(`Usuari: ${userId}`);
+      console.log(`Sessió: ${sessionId}`);
+      console.log(`Total canciones en sesión: ${sessions[sessionId].songs.length}`);
+      
+      // GENERAR CARTÓN ÚNICO: Barajar las canciones y tomar 20
+      const allSongs = sessions[sessionId].songs;
+      const shuffledSongs = shuffleArray(allSongs);
+      const uniqueBingoCard = shuffledSongs.slice(0, 20);
+      
+      console.log(`Cartón generado para ${userId}:`, uniqueBingoCard.map(s => s.title));
+      
+      // Guardar el jugador con su cartón único
+      sessions[sessionId].players[userId] = { 
+        bingoCard: uniqueBingoCard,
+        markedSongs: [],
+        linesCompleted: 0,
+        isBingo: false
+      };
 
-      console.log('Guardant jugador en Firestore...')
+      // Guardar jugador en Firestore
       await db
         .collection('sessions').doc(sessionId)
         .collection('players').doc(userId)
         .set({
-          bingoCard,
+          bingoCard: uniqueBingoCard,
           markedSongs: [],
           linesCompleted: 0,
           isBingo: false,
           joinedAt: admin.firestore.FieldValue.serverTimestamp()
-        })
-      console.log('Jugador guardat exitosament en Firestore')
+        });
+      
+      console.log(`✅ Jugador ${userId} guardado con cartón único`);
 
-      socket.emit('sessionJoined', { sessionId, bingoCard })
-      socket.join(sessionId)
+      // Enviar el cartón único al jugador
+      socket.emit('sessionJoined', { 
+        sessionId, 
+        bingoCard: uniqueBingoCard 
+      });
+      
+      socket.join(sessionId);
+      
+      console.log(`✅ Jugador ${userId} unido exitosamente a sesión ${sessionId}`);
+      
     } catch (err) {
-      console.error('Error guardant jugador en Firestore:', err)
-      socket.emit('sessionError', 'Error al unir-se a la sessió')
+      console.error('Error en joinSession:', err);
+      socket.emit('sessionError', 'Error al unir-se a la sessió');
     }
-  })
+  });
 })
 
 // Función de prueba para verificar conexión
