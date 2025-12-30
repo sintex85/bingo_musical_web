@@ -2,59 +2,54 @@
 
 ## Filosofía de Diseño
 
-KikoBingo utiliza un diseño **moderno, oscuro y vibrante** inspirado en aplicaciones de música y gaming. La interfaz prioriza la legibilidad, accesibilidad y una experiencia inmersiva.
+KikoBingo utiliza un diseño **inspirado en Spotify**, con tonos oscuros y el icónico verde de la plataforma. La interfaz prioriza la legibilidad, accesibilidad y una experiencia inmersiva similar a las apps de música.
 
-## 🎨 Paleta de Colores
+## 🎨 Paleta de Colores - Estilo Spotify
 
 ### Colores Principales
 
 | Variable | Color | Hex | Uso |
 |----------|-------|-----|-----|
-| `--primary-color` | Indigo vibrante | `#6366f1` | Botones principales, acentos |
-| `--primary-hover` | Indigo oscuro | `#4f46e5` | Estados hover |
-| `--secondary-color` | Cyan | `#06b6d4` | Enlaces, elementos secundarios |
-| `--secondary-hover` | Cyan oscuro | `#0891b2` | Estados hover secundarios |
-| `--accent-color` | Amber/Dorado | `#f59e0b` | Elementos marcados, destacados |
-| `--accent-hover` | Amber oscuro | `#d97706` | Estados hover accent |
+| `--primary-color` | Verde Spotify | `#1DB954` | Botones, acentos, elementos activos |
+| `--primary-hover` | Verde Spotify claro | `#1ed760` | Estados hover |
+| `--secondary-color` | Verde Spotify | `#1DB954` | Enlaces, elementos secundarios |
+| `--accent-color` | Verde Spotify | `#1DB954` | Elementos marcados, destacados |
 
 ### Fondos y Superficies
 
 | Variable | Color | Hex | Uso |
 |----------|-------|-----|-----|
-| `--background-dark` | Slate muy oscuro | `#0f172a` | Fondo principal |
-| `--background-darker` | Slate casi negro | `#020617` | Fondos más profundos |
-| `--surface-color` | Slate oscuro | `#1e293b` | Tarjetas, contenedores |
-| `--surface-light` | Slate medio | `#334155` | Bordes, divisores |
+| `--background-dark` | Negro Spotify | `#121212` | Fondo principal |
+| `--background-darker` | Negro puro | `#000000` | Fondos más profundos |
+| `--surface-color` | Gris muy oscuro | `#181818` | Tarjetas, contenedores |
+| `--surface-light` | Gris oscuro | `#282828` | Bordes, divisores |
 
 ### Textos
 
 | Variable | Color | Hex | Uso |
 |----------|-------|-----|-----|
-| `--text-primary` | Slate muy claro | `#f8fafc` | Texto principal |
-| `--text-secondary` | Slate gris | `#94a3b8` | Texto secundario |
-| `--text-muted` | Slate gris oscuro | `#64748b` | Texto deshabilitado |
+| `--text-primary` | Blanco | `#FFFFFF` | Texto principal |
+| `--text-secondary` | Gris claro | `#B3B3B3` | Texto secundario |
+| `--text-muted` | Gris Spotify | `#535353` | Texto deshabilitado |
 
 ### Estados
 
 | Variable | Color | Hex | Uso |
 |----------|-------|-----|-----|
-| `--success-color` | Emerald | `#10b981` | Éxito, confirmaciones |
-| `--success-hover` | Emerald oscuro | `#059669` | Hover éxito |
-| `--error-color` | Red | `#ef4444` | Errores |
-| `--error-hover` | Red oscuro | `#dc2626` | Hover error |
+| `--success-color` | Verde Spotify | `#1DB954` | Éxito, confirmaciones |
+| `--error-color` | Rojo Spotify | `#E91429` | Errores |
 
 ## 🔤 Tipografía
 
 ### Fuentes
 
 ```css
-font-family: 'Circular Std', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
 ```
 
 **Jerarquía de fuentes**:
-1. Circular Std (preferida)
-2. Roboto (fallback)
-3. System fonts (fallback final)
+1. Montserrat (preferida - similar a Circular usada por Spotify)
+2. System fonts (fallback)
 
 ### Tamaños
 
