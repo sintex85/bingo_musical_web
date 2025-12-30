@@ -86,13 +86,38 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
   }
 }
 
-// Función para barajar un array (algoritmo Fisher-Yates mejorado con crypto)
-function shuffleArray(array) {
-  const shuffled = [...array]; // Crear una copia
+// Función para barajar un array con seed único por jugador
+function shuffleArrayWithSeed(array, seed) {
+  const shuffled = [...array];
+  
+  // Crear un generador de números pseudoaleatorios basado en el seed
+  let seedNum = 0;
+  for (let i = 0; i < seed.length; i++) {
+    seedNum = ((seedNum << 5) - seedNum) + seed.charCodeAt(i);
+    seedNum = seedNum & seedNum;
+  }
+  
+  // Función para generar número aleatorio basado en seed
+  const seededRandom = () => {
+    seedNum = (seedNum * 1103515245 + 12345) & 0x7fffffff;
+    return seedNum / 0x7fffffff;
+  };
+  
+  // Fisher-Yates con seed
   for (let i = shuffled.length - 1; i > 0; i--) {
-    // Usar crypto para mejor aleatoriedad
+    const j = Math.floor(seededRandom() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  return shuffled;
+}
+
+// Función para barajar un array (algoritmo Fisher-Yates con crypto)
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
     const randomBytes = crypto.randomBytes(4);
-    const randomValue = randomBytes.readUInt32BE(0) / 0xFFFFFFFF;
+    const randomValue = randomBytes.readUInt32BE(0) / 0x100000000;
     const j = Math.floor(randomValue * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
@@ -103,6 +128,20 @@ function shuffleArray(array) {
 function getCardHash(card) {
   const ids = card.map(s => s.id || s.title).join(',');
   return crypto.createHash('md5').update(ids).digest('hex').substring(0, 8);
+}
+
+// Generar cartón único para un jugador
+function generateUniqueCard(allSongs, uniqueSeed) {
+  // Combinar múltiples fuentes de entropía
+  const timestamp = Date.now().toString();
+  const randomPart = crypto.randomBytes(8).toString('hex');
+  const fullSeed = `${uniqueSeed}_${timestamp}_${randomPart}`;
+  
+  console.log(`🌱 Generando cartón con seed: ${fullSeed.substring(0, 30)}...`);
+  
+  // Barajar con el seed único
+  const shuffled = shuffleArrayWithSeed(allSongs, fullSeed);
+  return shuffled.slice(0, 20);
 }
 
 io.on('connection', socket => {
@@ -178,7 +217,7 @@ io.on('connection', socket => {
       console.log(`📀 Total canciones disponibles: ${sessions[sessionId].songs.length}`);
       console.log(`👥 Jugadores actuales: ${Object.keys(sessions[sessionId].players).length}`);
       
-      // GENERAR CARTÓN ÚNICO: Barajar las canciones y tomar 20
+      // GENERAR CARTÓN ÚNICO: Usar seed basado en el ID del jugador + timestamp
       const allSongs = sessions[sessionId].songs;
       
       // Verificar que hay suficientes canciones
@@ -187,12 +226,12 @@ io.on('connection', socket => {
         return socket.emit('sessionError', `La playlist necesita mínim 20 cançons (té ${allSongs.length})`);
       }
       
-      let shuffledSongs = shuffleArray(allSongs);
-      let uniqueBingoCard = shuffledSongs.slice(0, 20);
+      // Generar cartón con seed único basado en el userId
+      let uniqueBingoCard = generateUniqueCard(allSongs, `${sessionId}_${userId}_${socket.id}`);
       let cardHash = getCardHash(uniqueBingoCard);
       
-      console.log(`🎲 Cartón inicial generado - Hash: ${cardHash}`);
-      console.log(`📋 Primeras 5 canciones del cartón:`, uniqueBingoCard.slice(0, 5).map(s => s.title));
+      console.log(`🎲 Cartón generado - Hash: ${cardHash}`);
+      console.log(`📋 Primeras 5 canciones:`, uniqueBingoCard.slice(0, 5).map(s => s.title));
       
       // Verificar si el cartón es único comparando con otros jugadores
       const existingHashes = Object.values(sessions[sessionId].players)
@@ -200,18 +239,19 @@ io.on('connection', socket => {
       
       console.log(`🔍 Hashes existentes: [${existingHashes.join(', ')}]`);
       
-      if (existingHashes.includes(cardHash)) {
-        console.log(`⚠️ Hash duplicado detectado, regenerando cartón...`);
-        // Regenerar hasta obtener uno único (máximo 10 intentos)
-        let attempts = 0;
-        while (existingHashes.includes(cardHash) && attempts < 10) {
-          shuffledSongs = shuffleArray(allSongs);
-          uniqueBingoCard = shuffledSongs.slice(0, 20);
-          cardHash = getCardHash(uniqueBingoCard);
-          attempts++;
-          console.log(`   Intento ${attempts}: Hash ${cardHash}`);
-        }
-        console.log(`✅ Nuevo cartón generado después de ${attempts} intentos - Hash: ${cardHash}`);
+      // Si hay duplicado (muy improbable), regenerar
+      let attempts = 0;
+      while (existingHashes.includes(cardHash) && attempts < 10) {
+        console.log(`⚠️ Hash duplicado detectado, regenerando...`);
+        const extraEntropy = crypto.randomBytes(16).toString('hex');
+        uniqueBingoCard = generateUniqueCard(allSongs, `${userId}_${extraEntropy}`);
+        cardHash = getCardHash(uniqueBingoCard);
+        attempts++;
+        console.log(`   Intento ${attempts}: Hash ${cardHash}`);
+      }
+      
+      if (attempts > 0) {
+        console.log(`✅ Cartón único generado después de ${attempts} intentos`);
       }
       
       // Guardar el jugador con su cartón único
