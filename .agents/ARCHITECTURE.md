@@ -110,16 +110,25 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
 }
 ```
 
-### Algoritmo de Barajado (Fisher-Yates)
+### Algoritmo de Barajado (Fisher-Yates con Crypto)
 
 ```javascript
+// Usa crypto.randomBytes para mejor aleatoriedad
 function shuffleArray(array) {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const randomBytes = crypto.randomBytes(4);
+        const randomValue = randomBytes.readUInt32BE(0) / 0xFFFFFFFF;
+        const j = Math.floor(randomValue * (i + 1));
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+}
+
+// Cada cartón tiene un hash único para verificación
+function getCardHash(card) {
+    const ids = card.map(s => s.id || s.title).join(',');
+    return crypto.createHash('md5').update(ids).digest('hex').substring(0, 8);
 }
 ```
 

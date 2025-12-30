@@ -2,6 +2,7 @@ require('dotenv').config() // Añadir esta línea al principio
 
 const express = require('express')
 const http = require('http')
+const crypto = require('crypto')
 const { Server } = require('socket.io')
 const admin = require('firebase-admin')
 const SpotifyWebApi = require('spotify-web-api-node')
@@ -85,14 +86,23 @@ async function getSpotifyPlaylistSongs(playlistUrl) {
   }
 }
 
-// Función para barajar un array (algoritmo Fisher-Yates)
+// Función para barajar un array (algoritmo Fisher-Yates mejorado con crypto)
 function shuffleArray(array) {
   const shuffled = [...array]; // Crear una copia
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    // Usar crypto para mejor aleatoriedad
+    const randomBytes = crypto.randomBytes(4);
+    const randomValue = randomBytes.readUInt32BE(0) / 0xFFFFFFFF;
+    const j = Math.floor(randomValue * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+// Función para generar un hash simple del cartón (para debug)
+function getCardHash(card) {
+  const ids = card.map(s => s.id || s.title).join(',');
+  return crypto.createHash('md5').update(ids).digest('hex').substring(0, 8);
 }
 
 io.on('connection', socket => {
@@ -140,25 +150,74 @@ io.on('connection', socket => {
 
   socket.on('joinSession', async ({ sessionId, userId }) => {
     try {
+      // Intentar recuperar sesión de Firestore si no está en memoria
       if (!sessions[sessionId]) {
-        return socket.emit('sessionError', 'Sessió no trobada');
+        console.log(`⚠️ Sesión ${sessionId} no está en memoria, intentando recuperar de Firestore...`);
+        try {
+          const sessionDoc = await db.collection('sessions').doc(sessionId).get();
+          if (sessionDoc.exists) {
+            const data = sessionDoc.data();
+            sessions[sessionId] = {
+              playlistUrl: data.playlistUrl,
+              songs: data.songs,
+              players: {}
+            };
+            console.log(`✅ Sesión ${sessionId} recuperada de Firestore con ${data.songs.length} canciones`);
+          } else {
+            return socket.emit('sessionError', 'Sessió no trobada');
+          }
+        } catch (firestoreErr) {
+          console.error('Error recuperando de Firestore:', firestoreErr);
+          return socket.emit('sessionError', 'Sessió no trobada');
+        }
       }
       
-      console.log(`=== JUGADOR UNIÉNDOSE ===`);
-      console.log(`Usuari: ${userId}`);
-      console.log(`Sessió: ${sessionId}`);
-      console.log(`Total canciones en sesión: ${sessions[sessionId].songs.length}`);
+      console.log(`\n=== 🎮 JUGADOR UNIÉNDOSE ===`);
+      console.log(`👤 Usuario: ${userId}`);
+      console.log(`🎯 Sesión: ${sessionId}`);
+      console.log(`📀 Total canciones disponibles: ${sessions[sessionId].songs.length}`);
+      console.log(`👥 Jugadores actuales: ${Object.keys(sessions[sessionId].players).length}`);
       
       // GENERAR CARTÓN ÚNICO: Barajar las canciones y tomar 20
       const allSongs = sessions[sessionId].songs;
-      const shuffledSongs = shuffleArray(allSongs);
-      const uniqueBingoCard = shuffledSongs.slice(0, 20);
       
-      console.log(`Cartón generado para ${userId}:`, uniqueBingoCard.map(s => s.title));
+      // Verificar que hay suficientes canciones
+      if (allSongs.length < 20) {
+        console.error(`❌ Error: Solo hay ${allSongs.length} canciones, se necesitan mínimo 20`);
+        return socket.emit('sessionError', `La playlist necesita mínim 20 cançons (té ${allSongs.length})`);
+      }
+      
+      let shuffledSongs = shuffleArray(allSongs);
+      let uniqueBingoCard = shuffledSongs.slice(0, 20);
+      let cardHash = getCardHash(uniqueBingoCard);
+      
+      console.log(`🎲 Cartón inicial generado - Hash: ${cardHash}`);
+      console.log(`📋 Primeras 5 canciones del cartón:`, uniqueBingoCard.slice(0, 5).map(s => s.title));
+      
+      // Verificar si el cartón es único comparando con otros jugadores
+      const existingHashes = Object.values(sessions[sessionId].players)
+        .map(p => p.cardHash || getCardHash(p.bingoCard));
+      
+      console.log(`🔍 Hashes existentes: [${existingHashes.join(', ')}]`);
+      
+      if (existingHashes.includes(cardHash)) {
+        console.log(`⚠️ Hash duplicado detectado, regenerando cartón...`);
+        // Regenerar hasta obtener uno único (máximo 10 intentos)
+        let attempts = 0;
+        while (existingHashes.includes(cardHash) && attempts < 10) {
+          shuffledSongs = shuffleArray(allSongs);
+          uniqueBingoCard = shuffledSongs.slice(0, 20);
+          cardHash = getCardHash(uniqueBingoCard);
+          attempts++;
+          console.log(`   Intento ${attempts}: Hash ${cardHash}`);
+        }
+        console.log(`✅ Nuevo cartón generado después de ${attempts} intentos - Hash: ${cardHash}`);
+      }
       
       // Guardar el jugador con su cartón único
       sessions[sessionId].players[userId] = { 
         bingoCard: uniqueBingoCard,
+        cardHash: cardHash,
         markedSongs: [],
         linesCompleted: 0,
         isBingo: false
@@ -170,23 +229,26 @@ io.on('connection', socket => {
         .collection('players').doc(userId)
         .set({
           bingoCard: uniqueBingoCard,
+          cardHash: cardHash,
           markedSongs: [],
           linesCompleted: 0,
           isBingo: false,
           joinedAt: admin.firestore.FieldValue.serverTimestamp()
         });
       
-      console.log(`✅ Jugador ${userId} guardado con cartón único`);
+      console.log(`✅ Jugador ${userId} guardado con cartón único (Hash: ${cardHash})`);
 
       // Enviar el cartón único al jugador
       socket.emit('sessionJoined', { 
         sessionId, 
-        bingoCard: uniqueBingoCard 
+        bingoCard: uniqueBingoCard,
+        cardHash: cardHash
       });
       
       socket.join(sessionId);
       
       console.log(`✅ Jugador ${userId} unido exitosamente a sesión ${sessionId}`);
+      console.log(`=== FIN UNIÓN JUGADOR ===\n`);
       
     } catch (err) {
       console.error('Error en joinSession:', err);
