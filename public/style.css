@@ -1,24 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Circular+Std:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
 
-/* Variables CSS con nueva paleta de colores */
+/* Variables CSS - Paleta Spotify */
 :root {
-    --primary-color: #6366f1;        /* Indigo vibrante */
-    --primary-hover: #4f46e5;        /* Indigo más oscuro */
-    --secondary-color: #06b6d4;      /* Cyan */
-    --secondary-hover: #0891b2;      /* Cyan oscuro */
-    --accent-color: #f59e0b;         /* Amber/dorado */
-    --accent-hover: #d97706;         /* Amber oscuro */
-    --background-dark: #0f172a;      /* Slate muy oscuro */
-    --background-darker: #020617;    /* Slate casi negro */
-    --surface-color: #1e293b;        /* Slate oscuro */
-    --surface-light: #334155;        /* Slate medio */
-    --text-primary: #f8fafc;         /* Slate muy claro */
-    --text-secondary: #94a3b8;       /* Slate gris */
-    --text-muted: #64748b;           /* Slate gris oscuro */
-    --success-color: #10b981;        /* Emerald */
-    --success-hover: #059669;        /* Emerald oscuro */
-    --error-color: #ef4444;          /* Red */
-    --error-hover: #dc2626;          /* Red oscuro */
+    --primary-color: #1DB954;        /* Verde Spotify */
+    --primary-hover: #1ed760;        /* Verde Spotify claro */
+    --secondary-color: #1DB954;      /* Verde Spotify */
+    --secondary-hover: #169c46;      /* Verde Spotify oscuro */
+    --accent-color: #1DB954;         /* Verde Spotify */
+    --accent-hover: #169c46;         /* Verde Spotify oscuro */
+    --background-dark: #121212;      /* Negro Spotify */
+    --background-darker: #000000;    /* Negro puro */
+    --surface-color: #181818;        /* Gris muy oscuro Spotify */
+    --surface-light: #282828;        /* Gris oscuro Spotify */
+    --text-primary: #FFFFFF;         /* Blanco */
+    --text-secondary: #B3B3B3;       /* Gris claro Spotify */
+    --text-muted: #535353;           /* Gris Spotify */
+    --success-color: #1DB954;        /* Verde Spotify */
+    --success-hover: #169c46;        /* Verde Spotify oscuro */
+    --error-color: #E91429;          /* Rojo Spotify */
+    --error-hover: #c41120;          /* Rojo oscuro */
 }
 
 * {
@@ -28,8 +28,8 @@
 }
 
 body {
-    font-family: 'Circular Std', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, var(--background-darker) 0%, var(--background-dark) 50%, var(--surface-color) 100%);
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, var(--background-darker) 0%, var(--background-dark) 100%);
     color: var(--text-primary);
     min-height: 100vh;
     display: flex;
@@ -56,7 +56,7 @@ h1 {
     margin-bottom: 24px;
     text-align: center;
     letter-spacing: -0.04em;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+    background: linear-gradient(90deg, #1DB954 0%, #1ed760 50%, #1DB954 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -101,11 +101,11 @@ h1 {
 }
 
 .btn {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: var(--text-primary);
-    padding: 12px 32px;
+    background: #1DB954;
+    color: #000000;
+    padding: 14px 32px;
     border: none;
-    border-radius: 50px;
+    border-radius: 500px;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -114,30 +114,31 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    text-transform: none;
+    text-transform: uppercase;
     letter-spacing: 0.1em;
     min-height: 48px;
-    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
+    box-shadow: none;
 }
 
 .btn:hover {
-    background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px 0 rgba(99, 102, 241, 0.6);
+    background: #1ed760;
+    transform: scale(1.04);
+    box-shadow: none;
 }
 
 .btn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
+    background: #169c46;
 }
 
 .btn-green {
-    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-hover) 100%);
-    box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);
+    background: #1DB954;
+    box-shadow: none;
 }
 
 .btn-green:hover {
-    background: linear-gradient(135deg, var(--success-hover) 0%, var(--success-color) 100%);
-    box-shadow: 0 8px 25px 0 rgba(16, 185, 129, 0.6);
+    background: #1ed760;
+    box-shadow: none;
 }
 
 .btn-secondary {
@@ -183,14 +184,14 @@ h1 {
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid var(--primary-color);
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+    border: 4px solid #1DB954;
+    box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
     transition: all 0.3s ease;
 }
 
 .logo-image:hover {
     transform: scale(1.05);
-    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 12px 40px rgba(29, 185, 84, 0.5);
 }
 
 .title-container {
@@ -201,7 +202,7 @@ h1 {
     font-size: 56px;
     font-weight: 800;
     margin: 0 0 8px 0;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+    background: linear-gradient(90deg, #1DB954 0%, #1ed760 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
